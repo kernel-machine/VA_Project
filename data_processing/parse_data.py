@@ -85,5 +85,5 @@ for p in processes:
     p.join()
 
 print("Movies size", len(moviesDict))
-with open('json_data_test.json', 'w') as outfile:
+with open('dataset.json', 'w') as outfile:
     json.dump(moviesDict.copy(), outfile, allow_nan=False, indent=1)
