@@ -11,7 +11,8 @@ function drawParallelCoordinates(jsonData) {
             "runtime": x.runtime,
             "languages": x.spoken_languages.map(x => x.iso_639_1)
         }
-    }).filter(x => x.year >= 1960)
+    })
+    console.log(filtered_data.length)
     const margin = {top: 30, right: 10, bottom: 10, left: 0}
 
     const bboxSize = d3.select("#parrallelCoords").node().getBoundingClientRect()
