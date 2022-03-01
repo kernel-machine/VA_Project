@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+}
+
+.item {
+    padding: 10px;
+    border: 2px solid black;
+}
+
+.scatter_plt {
+    width: 50%;
+}
+
+.parrallel_coordinates_plt {
+    width: 50%;
+}
+
+.bubble_plt {
+    width: 33%;
+}
+
+.column_plt {
+    width: 33%;
+
+}
+
+.selected_movies_list {
+    width: 33%;
+}
