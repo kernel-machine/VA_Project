@@ -13,3 +13,5 @@ There are 5 parts:
 - **Bubble plot** with interchangeable data for each axis to visualize movies’ data, it’s also possible to select a specific year
 - **Column bar** to visualize genres division over different data
 - **List of select movies** a list of selected movies by user interaction
+
+You can test the website [here](https://kernel-machine.github.io/VA_Project/)
