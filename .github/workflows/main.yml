@@ -27,5 +27,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Pushing file on gh-pages
-        run: git subtree push --prefix front_end origin gh-pages
+        run: |
+          git pull
+          git subtree push --prefix front_end origin gh-pages
 
