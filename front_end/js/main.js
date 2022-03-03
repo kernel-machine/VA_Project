@@ -1,4 +1,4 @@
-import {drawParallelCoordinates} from "./parallelCoordinates.js";
+import {drawParallelCoordinates} from "./graphs/parallelCoordinates.js";
 
 const DATASET_PATH = "./resources/dataset/dataset.json"
 

@@ -27,3 +27,24 @@
 .selected_movies_list {
     width: 33%;
 }
+
+.line {
+    fill: none;
+    stroke: #7992e8;
+    stroke-width: 0.5;
+    opacity: 0.5;
+}
+
+.lineMultipleSelection {
+    fill: none;
+    stroke: #DB3A2B;
+    stroke-width: 1;
+    opacity: 1;
+}
+
+.lineHover {
+    fill: none;
+    stroke: #DB3A2B;
+    stroke-width: 2;
+    opacity: 1;
+}
