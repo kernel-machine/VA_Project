@@ -1,5 +1,5 @@
 function drawParallelCoordinates(jsonData) {
-    let isThereASelection = false
+
     const filtered_data = jsonData.map(x => {
         const date = new Date(x.relase_data)
         return {
@@ -77,7 +77,7 @@ function drawParallelCoordinates(jsonData) {
         .padding(1)
         .domain(dimensions);
 
-    // The path function take a row of the json as input, and return x and y coordinates of the line to draw for this raw.
+    //  The path function take a row of the json as input, and return x and y coordinates of the line to draw for this raw.
     // Genres and languages are processed in a different way to guarantee the 1-n visualization
     function path(data) {
         let points = []
@@ -106,6 +106,7 @@ function drawParallelCoordinates(jsonData) {
         return d3.line()(points)
     }
 
+    //Raise the axis, in this wey they overlap the other graphic elements
     function raiseAxis() {
         plt.selectAll(".axis").raise()
     }
@@ -159,25 +160,24 @@ function drawParallelCoordinates(jsonData) {
             .attr("id", function (d) {
                 return "axis" + d
             })
-    axes
-        //Text on top of each bar
-        .append("text")
-        .style("text-anchor", "middle")
+
+    //Text on top of each bar
+    axes.append("text")
+        .attr("class", "parallelDimensionsText")
         .attr("y", -9)
         .text((d) => {
             return prettyDimensionsName[d]
         })
 
-
-    //Alternates languages
+    //Alternates languages between left and right
     d3.selectAll("#axislanguages g > line")
-        .filter((e, i) => i % 2 == 0)
+        .filter((e, i) => i % 2 === 0)
         .each((d, i, n) => {
             const x2 = d3.select(n[i]).attr("x2")
             d3.select(n[i]).attr("x2", Number(x2) * -1)
         })
     d3.selectAll("#axislanguages g > text")
-        .filter((e, i) => i % 2 == 0)
+        .filter((e, i) => i % 2 === 0)
         .each((d, i, n) => {
             const x2 = -d3.select(n[i]).attr("x")
             d3.select(n[i]).attr("x", Number(x2) - 9)
@@ -201,18 +201,18 @@ function drawParallelCoordinates(jsonData) {
                 sel.attr("class", "line")
         })
         raiseAxis()
-
     }
 
-    const brushStart = function (e) {
+    //Called when an area is selected
+    function brushStart(e) {
         const upperBoundRect = e.selection[0]
         const lowerBoundRect = e.selection[1]
         let selectedX = xDomain.domain()
             .find((d) => {
-                return e.target == yDomain[d].brush;
+                return e.target === yDomain[d].brush;
             });
         let selectedElements = []
-        if (selectedX === "genres") {// || selectedX === "languages") {
+        if (selectedX === "genres") {
             const selectedElement = genres.filter(g => {
                 const yPosition = yDomain['genres'](g)
                 return upperBoundRect < yPosition && yPosition < lowerBoundRect
