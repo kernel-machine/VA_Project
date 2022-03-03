@@ -26,8 +26,13 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Pushing file on gh-pages
-        run: |
-          git pull
-          git subtree push --prefix front_end origin gh-pages
+      - name: Deploing to GitHub Pages
+        # You may pin to the exact commit or the version.
+        # uses: crazy-max/ghaction-github-pages@b8f8d291c97fe0edd9fb4ee73018163593418e8f
+        uses: crazy-max/ghaction-github-pages@v2.3.0
+        with:
+          # Build directory to deploy
+          build_dir: ./front_end
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
