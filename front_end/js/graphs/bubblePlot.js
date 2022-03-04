@@ -153,7 +153,6 @@ function drawGraph(svg, width, height, movies, keys) {
         .style("opacity", "0.7")
         .attr("stroke", "black")
 
-    return {'xAxis': xAxis, 'yAxis': yAxis, 'dots': dots}
 }
 
 function drawBubblePlot(movies) {
