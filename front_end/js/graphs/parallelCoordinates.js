@@ -12,7 +12,7 @@ function drawParallelCoordinates(jsonData) {
             "languages": x.spoken_languages.map(x => x.iso_639_1)
         }
     }).filter(x => x.languages.length > 0)
-    console.log("total", filtered_data)
+    //console.log("total", filtered_data)
 
     const margin = {top: 30, right: 10, bottom: 10, left: 0}
 
