@@ -36,6 +36,19 @@ function makeUI(movies) {
     return keys
 }
 
+function tickValuesFormatter(value, index) {
+    let strValue
+    if (value / 1000000000 > 1)
+        strValue = (value / 1000000000).toFixed(1) + "B"
+    else if (value / 1000000 > 1)
+        strValue = (value / 1000000).toFixed(1) + "M"
+    else if (value / 1000 > 1)
+        strValue = (value / 1000).toFixed(1) + "K"
+    else
+        strValue = value.toFixed(1)
+    return strValue.replace(/\.0/, '');
+}
+
 function drawGraph(svg, width, height, movies, keys) {
 
     const xSelect = document.getElementById("bubbleXSelect")
@@ -58,7 +71,7 @@ function drawGraph(svg, width, height, movies, keys) {
         svg.append("g")
             .attr("class", "bubbleAxis")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(x).tickFormat(tickValuesFormatter));
 
     // Add Y axis
     let y = d3.scaleLinear()
@@ -67,7 +80,7 @@ function drawGraph(svg, width, height, movies, keys) {
     let yAxis =
         svg.append("g")
             .attr("class", "bubbleAxis")
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y).tickFormat(tickValuesFormatter));
 
     if (radiusSelectedField === undefined) {//Disabled
         var z = function (a) {
@@ -112,7 +125,7 @@ function drawBubblePlot(movies) {
     })
     let keys = makeUI(movies)
 
-    const margin = {top: 20, right: 0, bottom: 20, left: 30}
+    const margin = {top: 20, right: 0, bottom: 20, left: 45}
 
     const bboxSize = d3.select("#bubblePlot").node().getBoundingClientRect()
     const width = (bboxSize.width * 0.9)
