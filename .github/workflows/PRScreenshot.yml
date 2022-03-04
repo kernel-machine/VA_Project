@@ -39,6 +39,6 @@ jobs:
       - name: Post Screenshot
         uses: edunad/actions-image@v1.0.1
         with:
-          path: './image.png'
+          path: './front_end/image.png'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           title: 'Current webpage screenshot'
