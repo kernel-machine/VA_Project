@@ -12,6 +12,7 @@ function makeUI(movies) {
     const xSelect = document.getElementById("bubbleXSelect")
     const ySelect = document.getElementById("bubbleYSelect")
     const radiusSelect = document.getElementById("bubbleRadiusSelect")
+    const yearRange = document.getElementById("yearRange")
 
     const keys = Object.keys(movies[0])
         .filter(key => (typeof movies[0][key]) == "number")
@@ -33,6 +34,11 @@ function makeUI(movies) {
         radiusSelect.add(optionRadius)
     }
 
+    const yearLimit = d3.extent(movies.map(x => x['release_year']))
+    yearRange.min = yearLimit[0]
+    yearRange.max = yearLimit[1]
+    yearRange.value = yearRange.min
+
     return keys
 }
 
@@ -47,6 +53,35 @@ function tickValuesFormatter(value, index) {
     else
         strValue = value.toFixed(1)
     return strValue.replace(/\.0/, '');
+}
+
+function animateSlider(graphRefreshFunction) {
+    const yearRange = d3.select("#yearRange")
+    const yearPlayButton = d3.select("#yearPlay")
+    const yearText = d3.select("#yearText")
+
+    if (yearPlayButton.text() === "Play") {
+        yearPlayButton.html("Stop")
+        yearRange
+            .transition()
+            .duration(5000)
+            .ease(d3.easeLinear)
+            .tween("my-tween", function () {
+                const i = d3.interpolateRound(this.value, this.max);
+                return function (t) {
+                    this.value = i(t);
+                    yearText.html(this.value)
+                    graphRefreshFunction()
+                };
+            })
+            .on("end", () => {
+                yearPlayButton.html("Play")
+            })
+    }
+    else {
+        yearPlayButton.html("Play")
+        yearRange.transition().end()
+    }
 }
 
 function drawGraph(svg, width, height, movies, keys) {
@@ -84,20 +119,22 @@ function drawGraph(svg, width, height, movies, keys) {
 
     if (radiusSelectedField === undefined) {//Disabled
         var z = function (a) {
-            return 1;
+            return 2;
         }
     }
     else {
         var z = d3.scaleLinear()
             .domain(d3.extent(movies.map(movie => movie[radiusSelectedField])))
-            .range([1, 10]);
+            .range([1, 20]);
     }
+
+    const yearRange = document.getElementById("yearRange")
 
     // Add dots
     let dots = svg.append('g')
         .attr("class", "bubbleDot")
         .selectAll("dot")
-        .data(movies)
+        .data(movies.filter(x => x.release_year == yearRange.value))
         .enter()
         .append("circle")
         .attr("cx", function (d) {
@@ -136,7 +173,12 @@ function drawBubblePlot(movies) {
         .attr("width", bboxSize.width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+    let yearText = svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 1.6)
+        .attr("id", "yearText")
 
     drawGraph(svg, width, height, movies, keys)
     const xSelect = document.getElementById("bubbleXSelect")
@@ -149,6 +191,17 @@ function drawBubblePlot(movies) {
     ySelect.onchange = graphRefresh
     radiusSelect.onchange = graphRefresh
 
+    const yearRange = document.getElementById("yearRange")
+    yearRange.oninput = function (e) {
+        yearText.html(e.target.value)
+        graphRefresh()
+    }
+    yearText.html(yearRange.value)
+
+    const yearPlayButton = document.getElementById("yearPlay")
+    yearPlayButton.onclick = function () {
+        animateSlider(graphRefresh)
+    }
 }
 
 export {drawBubblePlot}
