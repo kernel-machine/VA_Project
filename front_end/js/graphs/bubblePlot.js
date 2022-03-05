@@ -89,6 +89,7 @@ function drawGraph(svg, width, height, movies, keys) {
     const xSelect = document.getElementById("bubbleXSelect")
     const ySelect = document.getElementById("bubbleYSelect")
     const radiusSelect = document.getElementById("bubbleRadiusSelect")
+    const checkboxByYear = document.getElementById("filterByYear")
 
     const xSelectedField = keys[xSelect.value]
     const ySelectedField = keys[ySelect.value]
@@ -129,12 +130,14 @@ function drawGraph(svg, width, height, movies, keys) {
     }
 
     const yearRange = document.getElementById("yearRange")
+    let filteredData = checkboxByYear.checked ?
+        movies.filter(x => x.release_year == yearRange.value) : movies
 
     // Add dots
     let dots = svg.append('g')
         .attr("class", "bubbleDot")
         .selectAll("dot")
-        .data(movies.filter(x => x.release_year == yearRange.value))
+        .data(filteredData)
         .enter()
         .append("circle")
         .attr("cx", function (d) {
@@ -178,29 +181,39 @@ function drawBubblePlot(movies) {
         .attr("x", width / 2)
         .attr("y", height / 1.6)
         .attr("id", "yearText")
+        .attr("opacity", 1)
 
     drawGraph(svg, width, height, movies, keys)
-    const xSelect = document.getElementById("bubbleXSelect")
-    const ySelect = document.getElementById("bubbleYSelect")
-    const radiusSelect = document.getElementById("bubbleRadiusSelect")
+    const xSelect = d3.select("#bubbleXSelect")
+    const ySelect = d3.select("#bubbleYSelect")
+    const radiusSelect = d3.select("#bubbleRadiusSelect")
+    const checkboxByYear = document.getElementById("filterByYear")
     const graphRefresh = function () {
         drawGraph(svg, width, height, movies, keys)
     }
-    xSelect.onchange = graphRefresh
-    ySelect.onchange = graphRefresh
-    radiusSelect.onchange = graphRefresh
+    xSelect.on('change', graphRefresh)
+    ySelect.on('change', graphRefresh)
+    radiusSelect.on('change', graphRefresh)
 
-    const yearRange = document.getElementById("yearRange")
-    yearRange.oninput = function (e) {
+    const yearRange = d3.select("#yearRange")
+    yearRange.on('input', function (e) {
         yearText.html(e.target.value)
         graphRefresh()
-    }
-    yearText.html(yearRange.value)
+    })
+    yearText.html(yearRange.property('value'))
 
-    const yearPlayButton = document.getElementById("yearPlay")
-    yearPlayButton.onclick = function () {
+    const yearPlayButton = d3.select("#yearPlay")
+    yearPlayButton.on('click', function () {
         animateSlider(graphRefresh)
+    })
+
+    checkboxByYear.onchange = function (e) {
+        yearText.attr("opacity", e.target.checked ? 1 : 0)
+        yearPlayButton.node().disabled = !e.target.checked
+        yearRange.node().disabled = !e.target.checked
+        graphRefresh()
     }
+    graphRefresh()
 }
 
 export {drawBubblePlot}

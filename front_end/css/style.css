@@ -2,9 +2,13 @@
     display: flex;
 }
 
-.item {
+.page_box {
     padding: 10px;
     border: 2px solid black;
+}
+
+.flex_item {
+    padding: 5px;
 }
 
 .scatter_plt {
@@ -69,11 +73,17 @@
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
     -webkit-transition: .2s; /* 0.2 seconds transition on hover */
     transition: opacity .2s;
+    margin-left: 5px;
 }
 
 /* Mouse-over effects */
 .slider:hover {
     opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* Disabled effects */
+.slider:disabled {
+    opacity: 0.1; /* Fully shown on mouse-over */
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
