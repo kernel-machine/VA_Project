@@ -5,6 +5,7 @@ import json
 from math import isnan
 import multiprocessing
 import os
+from datetime import datetime
 
 movies_metadata = pd.read_csv("kaggle/movies_metadata.csv", low_memory=False)
 keywords_csv = pd.read_csv("kaggle/keywords.csv", low_memory=False)
@@ -32,6 +33,7 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             title = movies_metadata.at[current_row, 'title']
             genres = ast.literal_eval(movies_metadata.at[current_row, 'genres'])
             release_data = movies_metadata.at[current_row, 'release_date']  # Format 1989-02-17
+            release_year = datetime.strptime(str(release_data), "%Y-%m-%d").year
             runtime = float(movies_metadata.at[current_row, 'runtime'])
             spoken_languages = ast.literal_eval(movies_metadata.at[current_row, 'spoken_languages'])
             keywords = ast.literal_eval(get_keywords_by_id(movie_id))
@@ -44,13 +46,15 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             print("Wrong format")
         else:
             if vote_average > 0 and vote_count > 0 and revenue > 0 and popularity > 0 and budget > 0 and \
-                    keywords is not None and not isnan(runtime):
+                    keywords is not None and not isnan(runtime) and len(keywords) > 0 and len(spoken_languages) > 0 \
+                    and len(genres) > 0:
                 result.append({
                     'id': movie_id,
                     'imdb_id': imdb_id,
                     'title': title,
                     'genres': genres,
-                    'relase_data': release_data,
+                    'release_data': release_data,
+                    'release_year': release_year,
                     'runtime': runtime,
                     'spoken_languages': spoken_languages,
                     'vote_avg': vote_average,
