@@ -92,14 +92,14 @@
     appearance: none;
     width: 15px; /* Set a specific slider handle width */
     height: 15px; /* Slider handle height */
-    background: #04AA6D; /* Green background */
+    background: #7992e8; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
 
 .slider::-moz-range-thumb {
     width: 15px; /* Set a specific slider handle width */
     height: 15px; /* Slider handle height */
-    background: #04AA6D; /* Green background */
+    background: #7992e8; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
 
@@ -107,4 +107,11 @@
     fill: rgba(196, 196, 196, 0.43);
     text-anchor: middle;
     font-size: 90pt;
+    pointer-events: none;
+
+}
+
+.bubbleDot {
+    fill: #7992e8;
+    opacity: 0.7;
 }

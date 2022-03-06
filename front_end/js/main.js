@@ -1,5 +1,5 @@
 import {drawParallelCoordinates} from "./graphs/parallelCoordinates.js";
-import {drawBubblePlot} from "./graphs/bubblePlot.js";
+import {BubblePlot} from "./graphs/bubblePlot.js";
 
 const DATASET_PATH = "./resources/dataset/dataset.json"
 
@@ -8,7 +8,7 @@ function init() {
         .then((response) => {
             const movies = response.movies
             drawParallelCoordinates(movies)
-            drawBubblePlot(movies)
+            const bubblePlot = new BubblePlot(movies)
         })
 }
 

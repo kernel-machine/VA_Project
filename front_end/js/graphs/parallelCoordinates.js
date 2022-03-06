@@ -1,11 +1,10 @@
 function drawParallelCoordinates(jsonData) {
 
     const filtered_data = jsonData.map(x => {
-        const date = new Date(x.relase_data)
         return {
             "id": x.id,
             "genres": x.genres.map(x => x.name),
-            "year": date.getFullYear(),
+            "year": x.release_year,
             "vote_avg": x.vote_avg,
             "#votes": x.vote_count,
             "runtime": x.runtime,
@@ -17,8 +16,8 @@ function drawParallelCoordinates(jsonData) {
     const margin = {top: 30, right: 10, bottom: 10, left: 0}
 
     const bboxSize = d3.select("#parrallelCoords").node().getBoundingClientRect()
-    const width = (bboxSize.width * 0.9) + margin.left + margin.bottom
-    const height = (width / 2)
+    const width = (bboxSize.width) + margin.left + margin.bottom
+    const height = (width / 2.3)
 
     let plt = d3.select("#parrallelCoords")
         .append("svg")
