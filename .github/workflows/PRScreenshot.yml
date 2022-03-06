@@ -34,7 +34,7 @@ jobs:
         run: |
           cd ./front_end
           python3 -m http.server 8568 & 
-          pageres http://localhost:8568/index.html 1920x1080 --filename=image -d 1
+          pageres http://localhost:8568/index.html --filename=image -d 1
           
       - name: Post Screenshot
         uses: edunad/actions-image@v1.0.1
