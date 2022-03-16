@@ -8,26 +8,37 @@
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-    <div class="container" style="flex-direction: column">
-        <div class="container" style="flex-direction: row">
-            <div class="item scatter_plt">
-                <a>MDS Graph</a>
-            </div>
-            <div id="parrallelCoords" class="item parrallel_coordinates_plt">
-                <a>Parallel coordinates</a>
-            </div>
+<div class="container" style="flex-direction: column">
+    <div class="container" style="flex-direction: row">
+        <div class="page_box scatter_plt">
+            <a>MDS Graph</a>
         </div>
-        <div class="container" style="flex-direction: row">
-            <div class="item bubble_plt">
-                <a>Bubble plot</a>
-            </div>
-            <div class="item column_plt">
-                <a>Column plot</a>
-            </div>
-            <div class="item selected_movies_list">
-                <a>Selected movies</a>
-            </div>
+        <div id="parrallelCoords" class="page_box parrallel_coordinates_plt">
+            <a>Parallel coordinates</a>
         </div>
     </div>
+    <div class="container" style="flex-direction: row">
+        <div class="page_box bubble_plt">
+            X:<select id="bubbleXSelect"></select>
+            Y:<select id="bubbleYSelect"></select>
+            Radius:<select id="bubbleRadiusSelect">
+            <option default value="-1">Disabled</option>
+        </select>
+            <div id="bubblePlot"></div>
+            <div class="container" style="align-items: center">
+                <input type="checkbox" id="filterByYear">
+                <label  class="flex_item" for="filterByYear" style="white-space: nowrap">Filter by year</label>
+                <button class="flex_item" id="yearPlay">Play</button>
+                <input type="range" class="slider" id="yearRange">
+            </div>
+        </div>
+        <div class="page_box column_plt">
+            <a>Column plot</a>
+        </div>
+        <div class="page_box selected_movies_list">
+            <a>Selected movies</a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
