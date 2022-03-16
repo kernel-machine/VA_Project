@@ -26,7 +26,6 @@ class ParallelCoordinates extends Graph {
             }
         }).filter(x => x.languages.length > 0)
         this.selectedMovies = [];
-        //console.log("total", filtered_data)
 
         const margin = {top: 30, right: 10, bottom: 10, left: 0}
 
@@ -198,7 +197,6 @@ class ParallelCoordinates extends Graph {
     }
 
     highlightSelectedLines(moviesId) {
-        console.log(moviesId)
         this.filtered_data.forEach(movie => {
             const needSelection = moviesId.includes(movie.id)
             const sel = d3.selectAll("#line" + movie.id)
@@ -230,7 +228,6 @@ class ParallelCoordinates extends Graph {
                 isDiscrete: true,
                 selection: selectedElement
             }
-            console.log(selectedElements[selectedX])
         }
         else if (selectedX === "languages") {
             const selectedElement = this.languages.filter(g => {
@@ -241,7 +238,6 @@ class ParallelCoordinates extends Graph {
                 isDiscrete: true,
                 selection: selectedElement
             }
-            console.log(selectedElements[selectedX])
         }
         else {
             const lowerBound = this.yDomain[selectedX].invert(lowerBoundRect)
@@ -250,7 +246,6 @@ class ParallelCoordinates extends Graph {
                 isDiscrete: false,
                 selection: [lowerBound, upperBound]
             }
-            console.log(selectedX, selectedElements[selectedX])
         }
 
         this.filtered_data.forEach(movie => {
@@ -316,7 +311,6 @@ class ParallelCoordinates extends Graph {
 
     setSelection(selection) {
         super.setSelection(selection);
-       // console.log("movies to select", movieToSelect)
        this.highlightSelectedLines(selection);
     }
 

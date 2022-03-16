@@ -271,7 +271,6 @@ class BubblePlot extends Graph{
                 && yValues[1] < movie[ySelectedField] && movie[ySelectedField] < yValues[0]
                && filterByYear
         })
-        console.log("SELECTED", this.selectedMovies)
         this.highLightSelected(this.selectedMovies.map(x=>x.id))
         this.updateSelection();
     }
