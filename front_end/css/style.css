@@ -115,3 +115,8 @@
     fill: #7992e8;
     opacity: 0.7;
 }
+
+.bubbleSelectedDot {
+    fill: #ff0000;
+    opacity: 1;
+}

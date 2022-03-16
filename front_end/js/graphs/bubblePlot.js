@@ -1,4 +1,6 @@
-class BubblePlot {
+import {Graph} from "./Graph.js";
+
+class BubblePlot extends Graph{
 
     niceNames = {
         'popularity': "Popularity",
@@ -11,8 +13,10 @@ class BubblePlot {
     }
 
     constructor(movies) {
+        super();
         this.movies = movies
         this.keys = this.makeUI()
+        this.selectedMovies = [];
 
         const margin = {top: 20, right: 0, bottom: 20, left: 45}
 
@@ -198,14 +202,14 @@ class BubblePlot {
         else
             yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(this.tickValuesFormatter))
 
-
+        let z;
         if (radiusSelectedField === undefined) {//Disabled
-            var z = function (a) {
+            z = function (a) {
                 return 2;
-            }
+            };
         }
         else {
-            var z = d3.scaleLinear()
+            z = d3.scaleLinear()
                 .domain(d3.extent(this.movies.map(movie => movie[radiusSelectedField])))
                 .range([1, 20]);
         }
@@ -260,14 +264,35 @@ class BubblePlot {
         const filterByYearEnabled = checkboxByYear.node().checked
         const selectedYear = yearRange.node().value
 
-        const filteredMovie = this.movies.filter(movie => {
+        this.selectedMovies = this.movies.filter(movie => {
             const filterByYear = (filterByYearEnabled ? movie['release_year'] == selectedYear : true)
 
             return xValues[0] < movie[xSelectedField] && movie[xSelectedField] < xValues[1]
                 && yValues[1] < movie[ySelectedField] && movie[ySelectedField] < yValues[0]
                && filterByYear
         })
-        console.log("SELECTED", filteredMovie)
+        console.log("SELECTED", this.selectedMovies)
+        this.highLightSelected(this.selectedMovies.map(x=>x.id))
+        this.updateSelection();
+    }
+
+    highLightSelected(selectedIds){
+        this.movies.forEach(movie=>{
+            if(selectedIds.includes(movie.id))
+                d3.selectAll("#dot"+movie.id).attr("class","bubbleSelectedDot")
+            else
+                d3.selectAll("#dot"+movie.id).attr("class","bubbleDot")
+        })
+    }
+
+    getSelected() {
+        super.getSelected();
+        return this.selectedMovies.map(x=>x.id);
+    }
+
+    setSelection(selection) {
+        super.setSelection(selection);
+        this.highLightSelected(selection)
     }
 
 }

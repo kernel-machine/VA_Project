@@ -1,4 +1,6 @@
-class ParallelCoordinates {
+import {Graph} from "./Graph.js";
+
+class ParallelCoordinates extends Graph {
 
     prettyDimensionsName = {
         'genres': "Genres",
@@ -10,7 +12,7 @@ class ParallelCoordinates {
     }
 
     constructor(movies) {
-
+        super();
         this.originalData = movies;
         this.filtered_data = movies.map(x => {
             return {
@@ -23,6 +25,7 @@ class ParallelCoordinates {
                 "languages": x.spoken_languages.map(x => x.iso_639_1)
             }
         }).filter(x => x.languages.length > 0)
+        this.selectedMovies = [];
         //console.log("total", filtered_data)
 
         const margin = {top: 30, right: 10, bottom: 10, left: 0}
@@ -194,15 +197,10 @@ class ParallelCoordinates {
             })
     }
 
-    highlightSelectedLines() {
-        const notEmptyBins = this.dimensions.filter(d => this.selectedIdsBins[d].size > 0).map(d => this.selectedIdsBins[d])
-        if (notEmptyBins.length === 0)
-            return
-
-        const intersection = this.filtered_data.map(x => x.id).filter(x => notEmptyBins.every(bin => bin.has(x)))
-
+    highlightSelectedLines(moviesId) {
+        console.log(moviesId)
         this.filtered_data.forEach(movie => {
-            const needSelection = intersection.some(x => x === movie.id)
+            const needSelection = moviesId.includes(movie.id)
             const sel = d3.selectAll("#line" + movie.id)
             if (needSelection) {
                 sel.attr("class", "lineMultipleSelection")
@@ -282,8 +280,13 @@ class ParallelCoordinates {
                     }
                 })
         })
-        console.log(this.selectedIdsBins)
-        this.highlightSelectedLines()
+
+        const notEmptyBins = this.dimensions.filter(d => this.selectedIdsBins[d].size > 0).map(d => this.selectedIdsBins[d])
+        if (notEmptyBins.length === 0)
+            return
+        this.selectedMovies = this.filtered_data.map(x => x.id).filter(x => notEmptyBins.every(bin => bin.has(x)))
+        this.highlightSelectedLines(this.selectedMovies)
+        this.updateSelection();
     }
 
 
@@ -304,6 +307,17 @@ class ParallelCoordinates {
                         .on("brush", (e) => this.brushStart(e))
             )
         })
+    }
+
+    getSelected() {
+        super.getSelected();
+        return this.selectedMovies;
+    }
+
+    setSelection(selection) {
+        super.setSelection(selection);
+       // console.log("movies to select", movieToSelect)
+       this.highlightSelectedLines(selection);
     }
 
 }
