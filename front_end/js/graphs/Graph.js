@@ -1,6 +1,7 @@
 //Each graph MUST implements these methods for the selection tool
 export class Graph {
     selectionTool=undefined;
+    name="Graph"
     /**
      * returns the selected movies by the graph
      *

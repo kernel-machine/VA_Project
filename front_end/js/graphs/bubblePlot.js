@@ -1,6 +1,8 @@
 import {Graph} from "./Graph.js";
 
-class BubblePlot extends Graph{
+class BubblePlot extends Graph {
+
+    name="Bubble Plot"
 
     niceNames = {
         'popularity': "Popularity",
@@ -30,7 +32,15 @@ class BubblePlot extends Graph{
             .attr("height", this.height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .call(d3.brush().on("brush", (e) => this.onBrush(e)))
+            .call(d3.brush()
+                .on("brush", (e) => this.onBrush(e))
+                .on("end", (e) => {
+                    if (e.selection == null) {
+                        this.selectedMovies=[]
+                        this.setSelection([])
+                        this.updateSelection()
+                    }
+                }))
 
         let yearText = svg.append("text")
             .attr("x", this.width / 2)
@@ -269,28 +279,26 @@ class BubblePlot extends Graph{
 
             return xValues[0] < movie[xSelectedField] && movie[xSelectedField] < xValues[1]
                 && yValues[1] < movie[ySelectedField] && movie[ySelectedField] < yValues[0]
-               && filterByYear
+                && filterByYear
         })
-        this.highLightSelected(this.selectedMovies.map(x=>x.id))
+        this.highLightSelected(this.selectedMovies.map(x => x.id))
         this.updateSelection();
     }
 
-    highLightSelected(selectedIds){
-        this.movies.forEach(movie=>{
-            if(selectedIds.includes(movie.id))
-                d3.selectAll("#dot"+movie.id).attr("class","bubbleSelectedDot")
+    highLightSelected(selectedIds) {
+        this.movies.forEach(movie => {
+            if (selectedIds.includes(movie.id))
+                d3.selectAll("#dot" + movie.id).attr("class", "bubbleSelectedDot")
             else
-                d3.selectAll("#dot"+movie.id).attr("class","bubbleDot")
+                d3.selectAll("#dot" + movie.id).attr("class", "bubbleDot")
         })
     }
 
     getSelected() {
-        super.getSelected();
-        return this.selectedMovies.map(x=>x.id);
+        return this.selectedMovies.map(x => x.id);
     }
 
     setSelection(selection) {
-        super.setSelection(selection);
         this.highLightSelected(selection)
     }
 
