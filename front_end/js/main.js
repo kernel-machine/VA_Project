@@ -1,5 +1,6 @@
 import {ParallelCoordinates} from "./graphs/parallelCoordinates.js";
 import {BubblePlot} from "./graphs/bubblePlot.js";
+import {ColumnPlot} from "./graphs/columnPlot.js";
 import {SelectionTool} from "./common/selectionTool.js";
 
 const DATASET_PATH = "./resources/dataset/dataset.json"
@@ -11,6 +12,7 @@ function init() {
             const movies = response.movies
             const parallelCoordinates = new ParallelCoordinates(movies)
             const bubblePlot = new BubblePlot(movies)
+            const columnPlot = new ColumnPlot(movies)
             selectionTool.addGraph(parallelCoordinates);
             selectionTool.addGraph(bubblePlot);
             parallelCoordinates.selectionTool = selectionTool;

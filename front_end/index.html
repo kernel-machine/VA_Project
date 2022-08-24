@@ -6,6 +6,9 @@
     <script src="js/lib/d3.min.js"></script>
     <script type="module" src="js/main.js"></script>
     <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 </head>
 <body>
 <div class="container" style="flex-direction: column">
@@ -32,8 +35,14 @@
                 <input type="range" class="slider" id="yearRange">
             </div>
         </div>
-        <div class="page_box column_plt">
-            <a>Column plot</a>
+        <div class="page_box column_plt" >
+            X:<select id="columnXSelect"></select>
+            <div id="columnPlot">
+
+            </div>
+            <div class="container" id="column_legend">
+            </div>
+            <div id="slider-range"></div>
         </div>
         <div class="page_box selected_movies_list">
             <a>Selected movies</a>

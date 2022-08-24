@@ -2,6 +2,8 @@ import {Graph} from "./Graph.js";
 
 class ParallelCoordinates extends Graph {
 
+    name="Parallel coordinates plot"
+
     prettyDimensionsName = {
         'genres': "Genres",
         "year": "Year",
@@ -167,8 +169,8 @@ class ParallelCoordinates extends Graph {
                     return "axis" + d
                 })
                 .each((d) => {
-                    if (d === "genres" || d === "year" || d === "vote_avg")
-                        d3.select("#axis" + d).call(d3.axisLeft(this.yDomain[d]));
+                    if ((d === "genres" || d === "year" || d === "vote_avg"))
+                        d3.select("#axis" + d).call(d3.axisLeft(this.yDomain[d]))//.tickFormat(d3.format("d")))
                     else
                         d3.select("#axis" + d).call(d3.axisRight(this.yDomain[d]));
                 })
@@ -197,6 +199,7 @@ class ParallelCoordinates extends Graph {
     }
 
     highlightSelectedLines(moviesId) {
+        console.log("HIGH",moviesId.length)
         this.filtered_data.forEach(movie => {
             const needSelection = moviesId.includes(movie.id)
             const sel = d3.selectAll("#line" + movie.id)
@@ -300,18 +303,25 @@ class ParallelCoordinates extends Graph {
                     d3.brushY()
                         .extent([[-10, 0], [10, this.height]])
                         .on("brush", (e) => this.brushStart(e))
+                        .on("end", (e) => {
+                            if (e.selection == null) {
+                                this.selectedMovies=[]
+                                this.setSelection([])
+                                this.updateSelection()
+                            }
+                        })
             )
         })
     }
 
     getSelected() {
-        super.getSelected();
         return this.selectedMovies;
     }
 
     setSelection(selection) {
-        super.setSelection(selection);
-       this.highlightSelectedLines(selection);
+        //super.setSelection(selection);
+        this.highlightSelectedLines(selection);
+
     }
 
 }
