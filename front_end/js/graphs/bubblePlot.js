@@ -20,7 +20,7 @@ class BubblePlot extends Graph {
     }
 
     constructor(movies) {
-        super();
+        super()
         this.movies = movies
         this.keys = this.makeUI()
         this.selectedMovies = [];
@@ -42,9 +42,7 @@ class BubblePlot extends Graph {
                 .on("brush", (e) => this.onBrush(e))
                 .on("end", (e) => {
                     if (e.selection == null) {
-                        this.selectedMovies = []
-                        this.setSelection([])
-                        this.updateSelection()
+                        this.clearSelection()
                     }
                 }))
 
@@ -253,19 +251,18 @@ class BubblePlot extends Graph {
             .attr("r", (d) => {
                 return z(d[radiusSelectedField]);
             })
-            .attr("stroke", "black")
-            .style("fill",defaultColor)
+            .style("fill", defaultColor)
+            .attr("class", "bubbleDot")
             .on('mouseover', e => {
                 const filmId = e.target.id.replace("dot", "")
-                const selectedFilm = this.movies.find(x => x.id == filmId)
-                console.log(selectedFilm.title)
-                if (!this.selectedMovies.includes(filmId))
-                    d3.select("#dot" + filmId).style("fill", hoverColor)
+                this.hoverAnElement(filmId)
             })
             .on('mouseleave', e => {
                 const filmId = e.target.id.replace("dot", "")
-                this.colorDot(filmId, this.selectedMovies.map(x => x.id))
+                this.leaveAnElement(filmId)
             })
+
+        this.updateSelection()
 
     }
 
@@ -294,34 +291,19 @@ class BubblePlot extends Graph {
                 && yValues[1] < movie[ySelectedField] && movie[ySelectedField] < yValues[0]
                 && filterByYear
         })
-        this.highLightSelected(this.selectedMovies.map(x => x.id))
-        this.updateSelection();
+        this.selectElements(this.selectedMovies.map(x => x.id))
     }
 
-    highLightSelected(selectedIds) {
-        this.highlightedIds = selectedIds
-        this.movies.forEach(movie => {
-            this.colorDot(movie.id, selectedIds)
-        })
+
+
+    colorElement(movieId, color) {
+        d3.select("#dot" + movieId).style("fill", color)
+            .raise()
     }
 
-    colorDot(movieId, selectedIds) {
-        if (selectedIds.length == 0 && this.highlightedIds.length == 0)
-            d3.selectAll("#dot" + movieId).style("fill", defaultColor)
-        else if (selectedIds.some(x => x == movieId) || this.highlightedIds.some(x => x == movieId))
-            d3.selectAll("#dot" + movieId).style("fill", selectedColor).raise()
-        else
-            d3.selectAll("#dot" + movieId).style("fill", unselectedColor)
+    colorAllElements(color) {
+        d3.selectAll(".bubbleDot").style("fill", color)
     }
-
-    getSelected() {
-        return this.selectedMovies.map(x => x.id);
-    }
-
-    setSelection(selection) {
-        this.highLightSelected(selection)
-    }
-
 }
 
 export { BubblePlot }

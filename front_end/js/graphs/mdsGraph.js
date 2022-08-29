@@ -1,17 +1,11 @@
 import { Graph } from "./Graph.js";
 
-const defaultColor = "#2c7bb6"
-const selectedColor = "#d7191c"
-const hoverColor = "#fdae61"
-const unselectedColor = "#abd9e9"
 
 export class MDSGraph extends Graph {
 
     constructor(movies) {
-        super();
+        super()
         this.movies = movies
-        this.selectedMovies = []
-        this.highlightedIds = []
 
         const margin = { top: 20, right: 10, bottom: 20, left: 25 }
 
@@ -29,11 +23,15 @@ export class MDSGraph extends Graph {
                 .on("brush", (e) => this.onBrush(e))
                 .on("end", (e) => {
                     if (e.selection == null) {
-                        this.selectedMovies = []
-                        this.setSelection([])
-                        this.updateSelection()
+                        this.clearSelection()
                     }
                 }))
+            .call(d3.zoom()
+                .scaleExtent([1, 8])
+                //.on("zoom", (transform) => console.log(transform.transform))
+            )
+
+
 
         this.xScaleLinear = d3.scaleLinear()
             .domain([-1, 1])
@@ -60,18 +58,16 @@ export class MDSGraph extends Graph {
             .attr("cx", d => this.xScaleLinear(d.mds[0]))
             .attr("cy", d => this.yScaleLinear(d.mds[1]))
             .attr("r", 2)
-            .style("fill", defaultColor)
+            .style("fill", this.defaultColor)
             .attr("id", d => "mdsDot" + d.id)
+            .attr("class", "mdsDot")
             .on('mouseover', e => {
                 const filmId = e.target.id.replace("mdsDot", "")
-                //const selectedFilm = this.movies.find(x => x.id == filmId)
-                //console.log(selectedFilm.title,selectedFilm)
-                if (!this.selectedMovies.includes(filmId))
-                    d3.select("#mdsDot" + filmId).style("fill", hoverColor)
+                this.hoverAnElement(filmId)
             })
             .on('mouseleave', e => {
                 const filmId = e.target.id.replace("mdsDot", "")
-                this.colorDot(filmId, this.selectedMovies.map(x => x.id))
+                this.leaveAnElement(filmId)
             })
 
 
@@ -89,34 +85,16 @@ export class MDSGraph extends Graph {
             return xValues[0] < movie.mds[0] && movie.mds[0] < xValues[1]
                 && yValues[0] < movie.mds[1] && movie.mds[1] < yValues[1]
         })
-        this.highLightSelected(this.selectedMovies.map(x => x.id))
+        this.selectElements(this.selectedMovies.map(x => x.id))
         this.updateSelection();
 
     }
 
-
-
-    highLightSelected(selectedIds) {
-        this.highlightedIds = selectedIds
-        this.movies.forEach(movie => {
-            this.colorDot(movie.id, selectedIds)
-        })
+    colorElement(movieId, color) {
+        d3.select("#mdsDot" + movieId).style("fill", color)
     }
 
-    colorDot(movieId, selectedIds) {
-        if (selectedIds.length == 0 && this.highlightedIds.length == 0)
-            d3.selectAll("#mdsDot" + movieId).style("fill", defaultColor)
-        else if (this.highlightedIds.some(x => x == movieId) || (this.highlightedIds.some(x => x == movieId) && selectedIds.some(x => x == movieId)))
-            d3.selectAll("#mdsDot" + movieId).style("fill", selectedColor)
-        else
-            d3.selectAll("#mdsDot" + movieId).style("fill", unselectedColor)
-    }
-
-    getSelected() {
-        return this.selectedMovies.map(x => x.id);
-    }
-
-    setSelection(selection) {
-        this.highLightSelected(selection)
+    colorAllElements(color) {
+        d3.selectAll(".mdsDot").style("fill", color)
     }
 }

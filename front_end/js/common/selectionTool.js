@@ -12,10 +12,11 @@ export class SelectionTool {
     }
 
     update() {
+
         let selection = this.graphs.map(x => {
             return x.getSelected()
         }).filter(x => x.length > 0)
-
+        
         if (selection.length > 0) {
             selection = selection.reduce((previous, current) => {
                 return previous.filter(x => current.includes(x));
@@ -25,7 +26,7 @@ export class SelectionTool {
             selection = []
         }
         this.graphs.forEach(graph => {
-            graph.setSelection(selection)
+            graph.highlightElements(selection)
         })
 
         if (this.selectionList) {
