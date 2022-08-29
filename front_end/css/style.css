@@ -34,21 +34,21 @@
 
 .line {
     fill: none;
-    stroke: #7992e8;
+    stroke: #2c7bb6;
     stroke-width: 0.5;
     opacity: 0.5;
 }
 
 .lineMultipleSelection {
     fill: none;
-    stroke: #DB3A2B;
+    stroke: #d7191c;
     stroke-width: 1;
     opacity: 1;
 }
 
 .lineHover {
     fill: none;
-    stroke: #DB3A2B;
+    stroke: #fdae61;
     stroke-width: 2;
     opacity: 1;
 }
@@ -120,3 +120,13 @@
     fill: #ff0000;
     opacity: 1;
 }
+
+#selectedMovie {
+    overflow: auto;
+    border: 2px solid black;
+    margin: 10px;
+  }
+
+  #noMovieSelected{
+    margin: 10px;
+  }

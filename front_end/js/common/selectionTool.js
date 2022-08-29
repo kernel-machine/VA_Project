@@ -7,9 +7,12 @@ export class SelectionTool {
         this.graphs.push(graph)
     }
 
+    addSelectionList(selectionList) {
+        this.selectionList = selectionList
+    }
+
     update() {
         let selection = this.graphs.map(x => {
-            console.log("NOW", x.name, "HAS", x.getSelected().length)
             return x.getSelected()
         }).filter(x => x.length > 0)
 
@@ -19,10 +22,14 @@ export class SelectionTool {
             })
         }
         else {
-            selection=[]
+            selection = []
         }
         this.graphs.forEach(graph => {
             graph.setSelection(selection)
-        });
+        })
+
+        if (this.selectionList) {
+            this.selectionList.addMovies(selection)
+        }
     }
 }

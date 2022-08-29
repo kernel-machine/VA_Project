@@ -1,8 +1,12 @@
-import {Graph} from "./Graph.js";
+import { Graph } from "./Graph.js";
+
+const defaultColor = "#2c7bb6"
+const selectedColor = "#d7191c"
+const hoverColor = "#fdae61"
 
 class BubblePlot extends Graph {
 
-    name="Bubble Plot"
+    name = "Bubble Plot"
 
     niceNames = {
         'popularity': "Popularity",
@@ -20,7 +24,7 @@ class BubblePlot extends Graph {
         this.keys = this.makeUI()
         this.selectedMovies = [];
 
-        const margin = {top: 20, right: 0, bottom: 20, left: 45}
+        const margin = { top: 20, right: 0, bottom: 20, left: 45 }
 
         const bboxSize = d3.select("#bubblePlot").node().getBoundingClientRect()
         this.width = (bboxSize.width * 0.9)
@@ -36,7 +40,7 @@ class BubblePlot extends Graph {
                 .on("brush", (e) => this.onBrush(e))
                 .on("end", (e) => {
                     if (e.selection == null) {
-                        this.selectedMovies=[]
+                        this.selectedMovies = []
                         this.setSelection([])
                         this.updateSelection()
                     }
@@ -168,7 +172,7 @@ class BubblePlot extends Graph {
         }
     }
 
-//Create the graph, if there is still a graph, it deletes and create a new one
+    //Create the graph, if there is still a graph, it deletes and create a new one
 
 
     updateGraph(svg) {
@@ -252,6 +256,15 @@ class BubblePlot extends Graph {
                 const filmId = e.target.id.replace("dot", "")
                 const selectedFilm = this.movies.find(x => x.id == filmId)
                 console.log(selectedFilm.title)
+                if (!this.selectedMovies.includes(filmId))
+                    d3.select("#dot" + filmId).style("fill", hoverColor)
+            })
+            .on('mouseleave', e => {
+                const filmId = e.target.id.replace("dot", "")
+                if (this.selectedMovies.includes(filmId))
+                    d3.select("#dot" + filmId).style("fill", selectedColor)
+                else
+                    d3.select("#dot" + filmId).style("fill", defaultColor)
             })
 
     }
@@ -288,9 +301,9 @@ class BubblePlot extends Graph {
     highLightSelected(selectedIds) {
         this.movies.forEach(movie => {
             if (selectedIds.includes(movie.id))
-                d3.selectAll("#dot" + movie.id).attr("class", "bubbleSelectedDot")
+                d3.selectAll("#dot" + movie.id).style("fill", selectedColor)
             else
-                d3.selectAll("#dot" + movie.id).attr("class", "bubbleDot")
+                d3.selectAll("#dot" + movie.id).style("fill", defaultColor)
         })
     }
 
@@ -304,4 +317,4 @@ class BubblePlot extends Graph {
 
 }
 
-export {BubblePlot}
+export { BubblePlot }
