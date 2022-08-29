@@ -1,8 +1,8 @@
-import {Graph} from "./Graph.js";
+import { Graph } from "./Graph.js";
 
 class ParallelCoordinates extends Graph {
 
-    name="Parallel coordinates plot"
+    name = "Parallel coordinates plot"
 
     prettyDimensionsName = {
         'genres': "Genres",
@@ -28,8 +28,9 @@ class ParallelCoordinates extends Graph {
             }
         }).filter(x => x.languages.length > 0)
         this.selectedMovies = [];
+        this.highlightedIds = []
 
-        const margin = {top: 30, right: 10, bottom: 10, left: 0}
+        const margin = { top: 30, right: 10, bottom: 10, left: 0 }
 
         const bboxSize = d3.select("#parrallelCoords").node().getBoundingClientRect()
         this.width = (bboxSize.width) + margin.left + margin.bottom
@@ -138,10 +139,8 @@ class ParallelCoordinates extends Graph {
                 const selectedLine = d.target.id
                 const film_id = selectedLine.replace("line", "")
                 const selection = this.plt.selectAll("#" + selectedLine)
-                if (selection.attr("class") !== "lineMultipleSelection") {
-                    selection.attr("class", "lineHover")
-                        .raise() //The element raise on top of the list to overlap the others
-                }
+                selection.attr("class", "lineHover")
+                    .raise() //The element raise on top of the list to overlap the others
                 //Print in the console the selected movie
                 const selectedMovie = this.originalData.find(x => x.id == film_id)
                 console.log(selectedMovie)
@@ -149,9 +148,9 @@ class ParallelCoordinates extends Graph {
             })
             .on("mouseleave", d => {
                 const selectedLine = d.target.id
-                const selection = this.plt.selectAll("#" + selectedLine)
-                if (selection.attr("class") !== "lineMultipleSelection")
-                    selection.attr("class", "line")
+                const movieId = selectedLine.replace("line", "")
+                console.log(this.selectedMovies)
+                this.colorLine(movieId, this.selectedMovies)
             })
 
 
@@ -199,18 +198,29 @@ class ParallelCoordinates extends Graph {
     }
 
     highlightSelectedLines(moviesId) {
-        console.log("HIGH",moviesId.length)
+        this.highlightedIds = moviesId
         this.filtered_data.forEach(movie => {
-            const needSelection = moviesId.includes(movie.id)
-            const sel = d3.selectAll("#line" + movie.id)
-            if (needSelection) {
-                sel.attr("class", "lineMultipleSelection")
-                sel.raise()
-            }
-            else
-                sel.attr("class", "line")
+            this.colorLine(movie.id, moviesId)
         })
+
         this.raiseAxis()
+    }
+
+    colorLine(id, movieIds) {
+        const sel = d3.selectAll("#line" + id)
+        const needSelection = this.highlightedIds.some(x => x == id) || (this.highlightedIds.some(x => x == id) && movieIds.some(x => x == id))
+
+        if (movieIds.length == 0 && this.highlightedIds.length == 0) {
+            sel.attr("class", "line")
+            sel.raise()
+        }
+        else if (needSelection) {
+            sel.attr("class", "lineMultipleSelection")
+            sel.raise()
+        }
+        else
+            sel.attr("class", "unselectedLine")
+            //sel.lower()
     }
 
     //Called when an area is selected
@@ -300,16 +310,16 @@ class ParallelCoordinates extends Graph {
         this.dimensions.forEach(d => {
             d3.select("#brush" + d).call(
                 this.yDomain[d].brush =
-                    d3.brushY()
-                        .extent([[-10, 0], [10, this.height]])
-                        .on("brush", (e) => this.brushStart(e))
-                        .on("end", (e) => {
-                            if (e.selection == null) {
-                                this.selectedMovies=[]
-                                this.setSelection([])
-                                this.updateSelection()
-                            }
-                        })
+                d3.brushY()
+                    .extent([[-10, 0], [10, this.height]])
+                    .on("brush", (e) => this.brushStart(e))
+                    .on("end", (e) => {
+                        if (e.selection == null) {
+                            this.selectedMovies = []
+                            this.setSelection([])
+                            this.updateSelection()
+                        }
+                    })
             )
         })
     }
@@ -326,4 +336,4 @@ class ParallelCoordinates extends Graph {
 
 }
 
-export {ParallelCoordinates}
+export { ParallelCoordinates }

@@ -3,6 +3,7 @@ import { Graph } from "./Graph.js";
 const defaultColor = "#2c7bb6"
 const selectedColor = "#d7191c"
 const hoverColor = "#fdae61"
+const unselectedColor = "#abd9e9"
 
 class BubblePlot extends Graph {
 
@@ -23,6 +24,7 @@ class BubblePlot extends Graph {
         this.movies = movies
         this.keys = this.makeUI()
         this.selectedMovies = [];
+        this.highlightedIds = []
 
         const margin = { top: 20, right: 0, bottom: 20, left: 45 }
 
@@ -233,7 +235,7 @@ class BubblePlot extends Graph {
             this.movies.filter(x => x.release_year == yearRange.value) : this.movies
 
         // Add dots
-        let dots = svg.append('g')
+        svg.append('g')
             .attr("class", "bubbleDot")
             .selectAll("dot")
             .data(filteredData)
@@ -252,6 +254,7 @@ class BubblePlot extends Graph {
                 return z(d[radiusSelectedField]);
             })
             .attr("stroke", "black")
+            .style("fill",defaultColor)
             .on('mouseover', e => {
                 const filmId = e.target.id.replace("dot", "")
                 const selectedFilm = this.movies.find(x => x.id == filmId)
@@ -261,10 +264,7 @@ class BubblePlot extends Graph {
             })
             .on('mouseleave', e => {
                 const filmId = e.target.id.replace("dot", "")
-                if (this.selectedMovies.includes(filmId))
-                    d3.select("#dot" + filmId).style("fill", selectedColor)
-                else
-                    d3.select("#dot" + filmId).style("fill", defaultColor)
+                this.colorDot(filmId, this.selectedMovies.map(x => x.id))
             })
 
     }
@@ -299,12 +299,19 @@ class BubblePlot extends Graph {
     }
 
     highLightSelected(selectedIds) {
+        this.highlightedIds = selectedIds
         this.movies.forEach(movie => {
-            if (selectedIds.includes(movie.id))
-                d3.selectAll("#dot" + movie.id).style("fill", selectedColor)
-            else
-                d3.selectAll("#dot" + movie.id).style("fill", defaultColor)
+            this.colorDot(movie.id, selectedIds)
         })
+    }
+
+    colorDot(movieId, selectedIds) {
+        if (selectedIds.length == 0 && this.highlightedIds.length == 0)
+            d3.selectAll("#dot" + movieId).style("fill", defaultColor)
+        else if (selectedIds.some(x => x == movieId) || this.highlightedIds.some(x => x == movieId))
+            d3.selectAll("#dot" + movieId).style("fill", selectedColor).raise()
+        else
+            d3.selectAll("#dot" + movieId).style("fill", unselectedColor)
     }
 
     getSelected() {

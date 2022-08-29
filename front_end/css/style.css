@@ -46,6 +46,13 @@
     opacity: 1;
 }
 
+.unselectedLine {
+    fill: none;
+    stroke: #abd9e9;
+    stroke-width: 1;
+    opacity: 1;
+}
+
 .lineHover {
     fill: none;
     stroke: #fdae61;

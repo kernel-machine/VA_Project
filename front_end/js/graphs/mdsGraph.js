@@ -3,6 +3,7 @@ import { Graph } from "./Graph.js";
 const defaultColor = "#2c7bb6"
 const selectedColor = "#d7191c"
 const hoverColor = "#fdae61"
+const unselectedColor = "#abd9e9"
 
 export class MDSGraph extends Graph {
 
@@ -10,6 +11,7 @@ export class MDSGraph extends Graph {
         super();
         this.movies = movies
         this.selectedMovies = []
+        this.highlightedIds = []
 
         const margin = { top: 20, right: 10, bottom: 20, left: 25 }
 
@@ -69,10 +71,7 @@ export class MDSGraph extends Graph {
             })
             .on('mouseleave', e => {
                 const filmId = e.target.id.replace("mdsDot", "")
-                if (this.selectedMovies.includes(filmId))
-                    d3.select("#mdsDot" + filmId).style("fill", selectedColor)
-                else
-                    d3.select("#mdsDot" + filmId).style("fill", defaultColor)
+                this.colorDot(filmId, this.selectedMovies.map(x => x.id))
             })
 
 
@@ -95,13 +94,22 @@ export class MDSGraph extends Graph {
 
     }
 
+
+
     highLightSelected(selectedIds) {
+        this.highlightedIds = selectedIds
         this.movies.forEach(movie => {
-            if (selectedIds.includes(movie.id))
-                d3.selectAll("#mdsDot" + movie.id).style("fill", selectedColor)
-            else
-                d3.selectAll("#mdsDot" + movie.id).style("fill", defaultColor)
+            this.colorDot(movie.id, selectedIds)
         })
+    }
+
+    colorDot(movieId, selectedIds) {
+        if (selectedIds.length == 0 && this.highlightedIds.length == 0)
+            d3.selectAll("#mdsDot" + movieId).style("fill", defaultColor)
+        else if (this.highlightedIds.some(x => x == movieId) || (this.highlightedIds.some(x => x == movieId) && selectedIds.some(x => x == movieId)))
+            d3.selectAll("#mdsDot" + movieId).style("fill", selectedColor)
+        else
+            d3.selectAll("#mdsDot" + movieId).style("fill", unselectedColor)
     }
 
     getSelected() {
