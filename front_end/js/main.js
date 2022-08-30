@@ -2,6 +2,8 @@ import {ParallelCoordinates} from "./graphs/parallelCoordinates.js";
 import {BubblePlot} from "./graphs/bubblePlot.js";
 import {ColumnPlot} from "./graphs/columnPlot.js";
 import {SelectionTool} from "./common/selectionTool.js";
+import {MDSGraph} from "./graphs/mdsGraph.js";
+import { SelectionList} from "./selectionList.js";
 
 const DATASET_PATH = "./resources/dataset/dataset.json"
 
@@ -13,10 +15,15 @@ function init() {
             const parallelCoordinates = new ParallelCoordinates(movies)
             const bubblePlot = new BubblePlot(movies)
             const columnPlot = new ColumnPlot(movies)
+            const mdsGraph = new MDSGraph(movies)
+            const listView = new SelectionList(movies);
             selectionTool.addGraph(parallelCoordinates);
             selectionTool.addGraph(bubblePlot);
+            selectionTool.addGraph(mdsGraph);
+            selectionTool.addSelectionList(listView);
             parallelCoordinates.selectionTool = selectionTool;
             bubblePlot.selectionTool = selectionTool;
+            mdsGraph.selectionTool = selectionTool;
         })
 }
 

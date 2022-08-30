@@ -1,8 +1,13 @@
-import {Graph} from "./Graph.js";
+import { Graph } from "./Graph.js";
+
+const defaultColor = "#2c7bb6"
+const selectedColor = "#d7191c"
+const hoverColor = "#fdae61"
+const unselectedColor = "#abd9e9"
 
 class BubblePlot extends Graph {
 
-    name="Bubble Plot"
+    name = "Bubble Plot"
 
     niceNames = {
         'popularity': "Popularity",
@@ -15,12 +20,13 @@ class BubblePlot extends Graph {
     }
 
     constructor(movies) {
-        super();
+        super()
         this.movies = movies
         this.keys = this.makeUI()
         this.selectedMovies = [];
+        this.highlightedIds = []
 
-        const margin = {top: 20, right: 0, bottom: 20, left: 45}
+        const margin = { top: 20, right: 0, bottom: 20, left: 45 }
 
         const bboxSize = d3.select("#bubblePlot").node().getBoundingClientRect()
         this.width = (bboxSize.width * 0.9)
@@ -36,9 +42,7 @@ class BubblePlot extends Graph {
                 .on("brush", (e) => this.onBrush(e))
                 .on("end", (e) => {
                     if (e.selection == null) {
-                        this.selectedMovies=[]
-                        this.setSelection([])
-                        this.updateSelection()
+                        this.clearSelection()
                     }
                 }))
 
@@ -168,7 +172,7 @@ class BubblePlot extends Graph {
         }
     }
 
-//Create the graph, if there is still a graph, it deletes and create a new one
+    //Create the graph, if there is still a graph, it deletes and create a new one
 
 
     updateGraph(svg) {
@@ -229,7 +233,7 @@ class BubblePlot extends Graph {
             this.movies.filter(x => x.release_year == yearRange.value) : this.movies
 
         // Add dots
-        let dots = svg.append('g')
+        svg.append('g')
             .attr("class", "bubbleDot")
             .selectAll("dot")
             .data(filteredData)
@@ -247,12 +251,18 @@ class BubblePlot extends Graph {
             .attr("r", (d) => {
                 return z(d[radiusSelectedField]);
             })
-            .attr("stroke", "black")
+            .style("fill", defaultColor)
+            .attr("class", "bubbleDot")
             .on('mouseover', e => {
                 const filmId = e.target.id.replace("dot", "")
-                const selectedFilm = this.movies.find(x => x.id == filmId)
-                console.log(selectedFilm.title)
+                this.hoverAnElement(filmId)
             })
+            .on('mouseleave', e => {
+                const filmId = e.target.id.replace("dot", "")
+                this.leaveAnElement(filmId)
+            })
+
+        this.updateSelection()
 
     }
 
@@ -281,27 +291,19 @@ class BubblePlot extends Graph {
                 && yValues[1] < movie[ySelectedField] && movie[ySelectedField] < yValues[0]
                 && filterByYear
         })
-        this.highLightSelected(this.selectedMovies.map(x => x.id))
-        this.updateSelection();
+        this.selectElements(this.selectedMovies.map(x => x.id))
     }
 
-    highLightSelected(selectedIds) {
-        this.movies.forEach(movie => {
-            if (selectedIds.includes(movie.id))
-                d3.selectAll("#dot" + movie.id).attr("class", "bubbleSelectedDot")
-            else
-                d3.selectAll("#dot" + movie.id).attr("class", "bubbleDot")
-        })
+
+
+    colorElement(movieId, color) {
+        d3.select("#dot" + movieId).style("fill", color)
+            .raise()
     }
 
-    getSelected() {
-        return this.selectedMovies.map(x => x.id);
+    colorAllElements(color) {
+        d3.selectAll(".bubbleDot").style("fill", color)
     }
-
-    setSelection(selection) {
-        this.highLightSelected(selection)
-    }
-
 }
 
-export {BubblePlot}
+export { BubblePlot }
