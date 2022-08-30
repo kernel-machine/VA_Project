@@ -54,7 +54,7 @@ export class Graph {
     */
     highlightElements(idElements) {
         this.highlightedElements = idElements
-        if (this.selectionIsActive)
+        if (this.selectionIsActive || this.highlightedElements.length > 0)
             this.colorAllElements(this.unselectedColor)
         else
             this.colorAllElements(this.defaultColor)
@@ -71,7 +71,7 @@ export class Graph {
     leaveAnElement(filmId) {
         if (this.highlightedElements.some(x => x == filmId))
             this.colorElement(filmId, this.selectedColor)
-        else if (this.selectionIsActive) {
+        else if (this.selectionIsActive || this.highlightedElements.length > 0) {
             this.colorElement(filmId, this.unselectedColor)
         }
         else {
