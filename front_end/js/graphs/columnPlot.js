@@ -1,6 +1,11 @@
 import { Graph } from "./Graph.js";
 import { range } from "../common/utils.js";
 
+class MoviesResult {
+    isGrouped = false
+    result = []
+}
+
 export class ColumnPlot extends Graph {
 
     niceNames = {
@@ -17,11 +22,11 @@ export class ColumnPlot extends Graph {
         super();
         this.movies = movies
 
-        const margin = { top: 20, right: 0, bottom: 20, left: 45 }
+        const margin = { top: 20, right: 0, bottom: 50, left: 45 }
 
         const bboxSize = d3.select("#columnPlot").node().getBoundingClientRect()
         this.width = (bboxSize.width * 0.9)
-        this.height = (this.width / 2)
+        this.height = (this.width / 2.2)
 
         let svg = d3.select("#columnPlot")
             .append("svg")
@@ -30,7 +35,7 @@ export class ColumnPlot extends Graph {
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-        let clip = svg.append("defs").append("SVG:clipPath")
+        svg.append("defs").append("SVG:clipPath")
             .attr("id", "clipColumn")
             .append("SVG:rect")
             .attr("width", this.width)
@@ -64,11 +69,10 @@ export class ColumnPlot extends Graph {
         }
         xSelect.on('change', onSelectChange)
 
-
         this.updateGraph(svg)
-
     }
 
+    //Draw the brush area used to zoom
     drawBrush(svg) {
         this.brush = d3.brushX()
             .extent([[0, 0], [this.width, this.height]])
@@ -81,53 +85,51 @@ export class ColumnPlot extends Graph {
             .call(this.brush)
     }
 
+    //Called on zoom
     animateScale(svg, selectionEvent = null) {
-
         const xSelect = document.getElementById("columnXSelect")
         const xSelectedField = this.keys[xSelect.value]
         const selectedElements = [...new Set(this.movies.map(x => x[xSelectedField]))]
 
         let bounds = d3.extent(selectedElements);
 
+        // If it is a selection, get min and max bounds
         if (selectionEvent && selectionEvent.selection)
             if (this.newXScale)
-                bounds = selectionEvent.selection.map(e => this.newXScale.invert(Math.trunc(e)))
+                bounds = selectionEvent.selection.map(e => this.newXScale.invert(e))
             else
-                bounds = selectionEvent.selection.map(e => this.xScaleLinear.invert(Math.trunc(e)))
+                bounds = selectionEvent.selection.map(e => this.xScaleLinear.invert(e))
 
         this.newXScale = d3.scaleLinear()
             .domain(bounds)
             .range([0, this.width]);
 
         const filteredElements = selectedElements.filter(x => x > bounds[0] && x < bounds[1])
-        const numberOfElements = Number.isInteger(filteredElements[0]) ? (Math.trunc(bounds[1]) - Math.trunc(bounds[0])) : filteredElements.length
-
-        const width = Math.max(Math.floor((this.width / numberOfElements) * 0.9), 1)
-
-        if (xSelectedField === "release_year" || xSelectedField === "runtime")
-            this.xAxis.call(d3.axisBottom(this.newXScale).tickFormat(d3.format("d")).ticks(Math.min(19, numberOfElements)))
-
-        else
-            this.xAxis.call(d3.axisBottom(this.newXScale).tickFormat(this.tickValuesFormatter))
 
         //Computation for y Axis
-        const genreGrouped = filteredElements
-            .sort()
-            .map(selElement => {
-                let obj = {
-                    selElement: selElement,
-                    sum: 0
-                }
-                this.genres.forEach(x => {
-                    obj[x.name] = x.movies.filter(x => x[xSelectedField] === selElement).length
-                    obj.sum += obj[x.name]
-                    return obj
-                })
-                return obj
-            });
+        const groupedMovies = this.groupMoviesBySelectedField(filteredElements, xSelectedField)
+        const maxValue = d3.max(groupedMovies.result.map(x => x.sum))
+        const numberOfElements = groupedMovies.result.length
 
-        console.log(genreGrouped)
-        const maxValue = d3.max(genreGrouped.map(x => x.sum))
+        console.log("ARE GROUPED?",groupedMovies.isGrouped, numberOfElements,maxValue)
+        const width = Math.max(Math.floor((this.width / numberOfElements) * 0.9), 1)
+
+        console.log("GROUPED MOVIES", groupedMovies.result)
+        if (!groupedMovies.isGrouped) {
+            console.log("QUI1")
+            const numberOfElements = Math.trunc(bounds[1]) - Math.trunc(bounds[0])
+            this.xAxis.call(d3.axisBottom(this.newXScale)
+                .tickFormat(d3.format("d"))
+                .ticks(Math.min(20, numberOfElements)))
+        }
+        else {
+            console.log("QUI2")
+            this.xAxis.call(d3.axisBottom(this.newXScale)
+                .tickValues(groupedMovies.result.map(x => x.selElement))
+                .tickFormat((d => groupedMovies.result.find(x => x.rangeElement[0] <= d && d < x.rangeElement[1]).textElement))
+            )
+        }
+
 
         let newYScale = d3.scaleLinear()
             .domain([0, maxValue])
@@ -149,6 +151,118 @@ export class ColumnPlot extends Graph {
 
     }
 
+    /*
+    Groups by the {selectedFiled} in order to have at maximum {maxElements} of groups.
+    {genreGrouped} is an array with the all fields that will be used to do the computation, 
+    this parameter is used only to computer the lower and upper bounds
+    */
+    groupMovies(selectedField, genreGrouped, maxElements) {
+        let a = []
+        const bounds = d3.extent(genreGrouped)
+        const rangeElements = range(bounds[0], bounds[1], Math.ceil(bounds[1] / maxElements))
+        let length = rangeElements.length
+        for (let i = 0; i < length - 1; i += 1) {
+            a.push([rangeElements[i], rangeElements[i + 1]])
+        }
+
+        return a
+            .map(selElement => {
+                let obj = {
+                    selElement: selElement[0],
+                    rangeElement: [selElement[0], selElement[1]],
+                    textElement: this.tickValuesFormatter(selElement[0]) + "-" + this.tickValuesFormatter(selElement[1]),
+                    //textElement: (selElement[0]) + "-" + (selElement[1]),
+                    sum: 0
+                }
+                this.genres.forEach(x => {
+                    const min = selElement[0]
+                    const max = selElement[1]
+                    obj[x.name] = x.movies.filter(x => min < x[selectedField] && x[selectedField] < max).length
+                    obj.sum += obj[x.name]
+                })
+                return obj
+            })
+    }
+
+    /*
+    Groups the movies by vote_avg, the movies are grouped using integer interval
+    */
+    groupMoviesForVoteAvg() {
+        return range(0, 11, 1).map(selElement => {
+            let obj = {
+                selElement: selElement,
+                sum: 0
+            }
+            this.genres.forEach(x => {
+                obj[x.name] = x.movies.filter(x => Math.trunc(x.vote_avg) === selElement).length
+                obj.sum += obj[x.name]
+                return obj
+            })
+            return obj
+        })
+    }
+
+    /*
+    Groups the movies by {selectedField} but using all the values of this field
+    */
+    moviesByGroup(selectedField, genreGrouped) {
+        return genreGrouped
+            .map(selElement => {
+                let obj = {
+                    selElement: selElement,
+                    sum: 0
+                }
+                this.genres.forEach(x => {
+                    obj[x.name] = x.movies.filter(x => x[selectedField] === selElement).length
+                    obj.sum += obj[x.name]
+                    return obj
+                })
+                return obj
+            })
+    }
+
+    /**
+     * Groups the movies by the selected field 
+     *
+     * @param {array} fieldsToProcess array with the fields of the x axis
+     */
+
+    groupMoviesBySelectedField(fieldsToProcess, selectedField) {
+        let genreGrouped = new MoviesResult()
+
+        if (selectedField == "vote_avg") {
+            genreGrouped.result = this.groupMoviesForVoteAvg()
+            genreGrouped.isGrouped = false
+        }
+        else if (fieldsToProcess.length > 100) {
+            genreGrouped.result = this.groupMovies(selectedField, fieldsToProcess, 20)
+            genreGrouped.isGrouped = true
+        }
+        else {
+            genreGrouped.result = this.moviesByGroup(selectedField, fieldsToProcess)
+            genreGrouped.isGrouped = false
+
+        }
+
+        return genreGrouped
+    }
+
+    getXBoundsByGropedMovies(genreGrouped, selectedField) {
+        let values;
+        if (selectedField == "vote_count") {
+            values = genreGrouped.map(e => e.rangeElement).reduce((prev, curr) => {
+                prev.push(curr[0])
+                prev.push(curr[1])
+                return prev
+            }, [])
+        }
+        else {
+            values = genreGrouped.map(e => e.selElement)
+        }
+
+        return d3.extent(values)
+    }
+
     updateGraph(svg) {
         const xSelect = document.getElementById("columnXSelect")
         const xSelectedField = this.keys[xSelect.value]
@@ -158,40 +272,43 @@ export class ColumnPlot extends Graph {
         d3.selectAll(".columnAxis")
             .remove()
 
-        const genreGrouped = [...new Set(this.movies.map(x => x[xSelectedField])
-            .sort())]
-            .map(selElement => {
-                let obj = {
-                    selElement: selElement,
-                    sum: 0
-                }
-                this.genres.forEach(x => {
-                    obj[x.name] = x.movies.filter(x => x[xSelectedField] === selElement).length
-                    obj.sum += obj[x.name]
-                    return obj
-                })
-                return obj
-            })
+        let genreGrouped = [...new Set(this.movies.map(x => x[xSelectedField]).sort())]
+        let groupMovies = this.groupMoviesBySelectedField(genreGrouped, xSelectedField)
+        const maxValue = d3.max(groupMovies.result.map(x => x.sum))
+        const bounds = this.getXBoundsByGropedMovies(groupMovies.result, xSelectedField)
 
-        const maxValue = d3.max(genreGrouped.map(x => x.sum))
-
-        let values = genreGrouped.map(e => e.selElement)
-        const bounds = d3.extent(values)
         this.xScaleLinear = d3.scaleLinear()
             .domain(bounds)
             .range([0, this.width]);
 
-        const numberOfElements = Math.trunc(bounds[1]) - Math.trunc(bounds[0])
         this.xAxis =
             svg.append("g")
                 .attr("class", "columnAxis")
                 .attr("transform", "translate(0," + this.height + ")")
-        if (xSelectedField === "release_year")
-            this.xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(d3.format("d")).ticks(Math.min(20, numberOfElements)))
 
-        else
-            this.xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(this.tickValuesFormatter))
+        if (!groupMovies.isGrouped) {
+            const numberOfElements = Math.trunc(bounds[1]) - Math.trunc(bounds[0])
+            this.xAxis.call(d3.axisBottom(this.xScaleLinear)
+                .tickFormat(d3.format("d"))
+                .ticks(Math.min(20, numberOfElements)))
+        }
+        else {
+            this.xAxis.call(d3.axisBottom(this.xScaleLinear)
+                .tickValues(groupMovies.result.map(x => x.selElement))
+                .tickFormat((d => groupMovies.result.find(x => x.rangeElement[0] <= d && d < x.rangeElement[1]).textElement))
+            )
+        }
 
+        /*
+        this.xAxis.selectAll("text")
+            .style("font-size", 20)
+            .style("text-anchor", "end")
+            .attr("dx", "-8px")
+            .attr("dy", "2px")
+            .attr("transform", function (d) {
+                return "rotate(-45)"
+            })
+            */
         this.yAxisLinear = d3.scaleLinear()
             .domain([0, maxValue])
             .range([this.height, 0])
@@ -200,14 +317,14 @@ export class ColumnPlot extends Graph {
             .attr("class", "columnAxis")
             .call(d3.axisLeft(this.yAxisLinear))
 
-        let a = d3.stack().keys(this.genres.map(x => x.name))(genreGrouped)
+        let a = d3.stack().keys(this.genres.map(x => x.name))(groupMovies.result)
 
         const colorScheme = d3.scaleOrdinal().domain(this.genres.map(x => x.name))
             //Colors generated by http://vrl.cs.brown.edu/color
             .range(["#52ef99", "#fd048f", "#80de1a", "#8138fc", "#5e9222", "#e376d4", "#18441b", "#f0b6d0", "#441f5d", "#cddb9b", "#1607a3", "#d3cb04", "#5064be", "#ef972d", "#043255", "#8ae1f9", "#9e211d", "#2c928b", "#f5603a", "#4c270a"])
 
         svg.selectAll(".bars").remove()
-        const width = Math.max((this.width / genreGrouped.length) - 2, 3)
+        const width = Math.max((this.width / groupMovies.result.length) - 2, 3)
         this.bars = svg.append("g").attr("clip-path", "url(#clipColumn)")
         this.bars
             .selectAll("g")
