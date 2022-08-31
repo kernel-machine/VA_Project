@@ -58,32 +58,35 @@ class BubblePlot extends Graph {
         const radiusSelect = d3.select("#bubbleRadiusSelect")
         const checkboxByYear = d3.select("#filterByYear")
         const graphRefresh = () => {
-            this.updateGraph(svg)
+            this.updateGraph(svg, true)
         }
         xSelect.on('change', graphRefresh)
         ySelect.on('change', graphRefresh)
         radiusSelect.on('change', graphRefresh)
 
         const yearRange = d3.select("#yearRange")
-        yearRange.on('input', function (e) {
+        yearRange.on('input', (e) => {
             yearText.html(e.target.value)
-            graphRefresh()
+            this.updateGraph(svg, false)
         })
         yearText.html(yearRange.property('value'))
 
         const yearPlayButton = d3.select("#yearPlay")
         yearPlayButton.on('click', () => {
-            this.animateSlider(graphRefresh)
+            this.animateSlider(() => {
+                this.updateGraph(svg, false)
+            })
         })
 
         checkboxByYear.on('change', (e) => {
             yearText.attr("opacity", e.target.checked ? 1 : 0)
             yearPlayButton.node().disabled = !e.target.checked
             yearRange.node().disabled = !e.target.checked
-            graphRefresh()
+            this.updateGraph(svg, false)
+
         })
         checkboxByYear.dispatch("change")
-        graphRefresh()
+        this.updateGraph(svg, false)
     }
 
     makeUI() {
@@ -175,7 +178,7 @@ class BubblePlot extends Graph {
     //Create the graph, if there is still a graph, it deletes and create a new one
 
 
-    updateGraph(svg) {
+    updateGraph(svg, isAnUpdate) {
 
         const xSelect = document.getElementById("bubbleXSelect")
         const ySelect = document.getElementById("bubbleYSelect")
@@ -187,8 +190,6 @@ class BubblePlot extends Graph {
         const radiusSelectedField = this.keys[radiusSelect.value]
 
         d3.selectAll(".bubbleAxis")
-            .remove()
-        d3.selectAll(".bubbleDot")
             .remove()
 
         this.xScaleLinear = d3.scaleLinear()
@@ -232,38 +233,53 @@ class BubblePlot extends Graph {
         let filteredData = checkboxByYear.checked ?
             this.movies.filter(x => x.release_year == yearRange.value) : this.movies
 
-        // Add dots
-        svg.append('g')
-            .attr("class", "bubbleDot")
-            .selectAll("dot")
-            .data(filteredData)
-            .enter()
-            .append("circle")
-            .attr("cx", (d) => {
-                return this.xScaleLinear(d[xSelectedField])
-            })
-            .attr("cy", (d) => {
-                return this.yScaleLinear(d[ySelectedField])
-            })
-            .attr("id", (d) => {
-                return "dot" + d['id']
-            })
-            .attr("r", (d) => {
-                return z(d[radiusSelectedField]);
-            })
-            .style("fill", defaultColor)
-            .attr("class", "bubbleDot")
-            .on('mouseover', e => {
-                const filmId = e.target.id.replace("dot", "")
-                this.hoverAnElement(filmId)
-            })
-            .on('mouseleave', e => {
-                const filmId = e.target.id.replace("dot", "")
-                this.leaveAnElement(filmId)
-            })
+        if (isAnUpdate) {
+            svg.selectAll(".bubbleDot")
+                .transition().duration(1000)
+                .attr("cx", d => {
+                    return this.xScaleLinear(d[xSelectedField])
+                })
+                .attr("cy", (d) => {
+                    return this.yScaleLinear(d[ySelectedField])
+                })
+                .attr("r", (d) => {
+                    return z(d[radiusSelectedField]);
+                })
+        }
+        else {
+            // Add dots
+            svg.selectAll(".bubbleDot").remove()
+            svg.append('g')
+                .selectAll("dot")
+                .data(filteredData)
+                .enter()
+                .append("circle")
+                .attr("cx", (d) => {
+                    return this.xScaleLinear(d[xSelectedField])
+                })
+                .attr("cy", (d) => {
+                    return this.yScaleLinear(d[ySelectedField])
+                })
+                .attr("id", (d) => {
+                    return "dot" + d['id']
+                })
+                .attr("r", (d) => {
+                    return z(d[radiusSelectedField]);
+                })
+                .style("stroke", "black")
+                .style("fill", defaultColor)
+                .attr("class", "bubbleDot")
+                .on('mouseover', e => {
+                    const filmId = e.target.id.replace("dot", "")
+                    this.hoverAnElement(filmId)
+                })
+                .on('mouseleave', e => {
+                    const filmId = e.target.id.replace("dot", "")
+                    this.leaveAnElement(filmId)
+                })
+        }
 
         this.updateSelection()
-
     }
 
 
