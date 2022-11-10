@@ -112,7 +112,6 @@ export class ColumnPlot extends Graph {
 
         let bounds = d3.extent(selectedElements);
 
-
         // If it is a selection, get min and max bounds
         if (selectionEvent && selectionEvent.selection)
             if (this.newXScale)
@@ -123,62 +122,6 @@ export class ColumnPlot extends Graph {
         console.log("filtering", bounds)
         const selectedMovies = this.movies.filter(m => m[xSelectedField] > bounds[0] && m[xSelectedField] < bounds[1])
         this.updateGraph(selectedMovies)
-
-        /*
-        this.newXScale = d3.scaleLinear()
-            .domain(bounds)
-            .range([0, this.width]);
-
-        const filteredElements = selectedElements.filter(x => x > bounds[0] && x < bounds[1])
-        console.log("filtered movies",selectedMovies)
-        //Computation for y Axis
-        const groupedMovies = this.groupMoviesBySelectedField(filteredElements, xSelectedField)
-        const maxValue = d3.max(groupedMovies.result.map(x => x.sum))
-        const numberOfElements = groupedMovies.result.length
-
-        const width = Math.max(Math.floor((this.width / numberOfElements) * 0.9), 1)
-
-        if (!groupedMovies.isGrouped) {
-            const numberOfElements = Math.trunc(bounds[1]) - Math.trunc(bounds[0])
-            this.xAxis.call(d3.axisBottom(this.newXScale)
-                .tickFormat(d3.format("d"))
-                .ticks(Math.min(20, numberOfElements)))
-        }
-        else {
-            this.xAxis.call(d3.axisBottom(this.newXScale)
-                .tickValues(groupedMovies.result.map(x => x.selElement))
-                .tickFormat((d => groupedMovies.result.find(x => x.rangeElement[0] <= d && d < x.rangeElement[1]).textElement))
-            )
-        }
-
-        let newYScale = d3.scaleLinear()
-            .domain([0, maxValue])
-            .range([this.height, 0])
-
-        //Qui scala solamente quelle vecchie, invece dovrebbe crearle nuove
-        const wasGrouped = true
-        if (wasGrouped) {
-            d3.selectAll(".bars")
-                .transition().duration(300)
-                .style("opacity", 0)
-            //this.updateGraph()
-        }
-        else {
-            d3.selectAll(".bars")
-                .transition().duration(1000)
-                .attr("x", d => this.newXScale(d.data.selElement) - width / 2)
-                .attr("y", d => newYScale(d[1]))
-                .attr("height", d => newYScale(d[0]) - newYScale(d[1]))
-                .attr("width", width)
-        }
-
-        this.yAxis.transition().duration(1000).call(d3.axisLeft(newYScale).tickFormat(d => {
-                if (d > 1000) return Math.floor(d / 1000) + "k"
-                return d
-            }
-        ))
-*/
-        //Remove brushed rectangle
         d3.selectAll(".brush_column").remove()
         //Draw new brush area
         this.drawBrush()
