@@ -119,7 +119,6 @@ export class ColumnPlot extends Graph {
             else
                 bounds = selectionEvent.selection.map(e => this.xScaleLinear.invert(e))
 
-        console.log("filtering", bounds)
         const selectedMovies = this.movies.filter(m => m[xSelectedField] > bounds[0] && m[xSelectedField] < bounds[1])
         this.updateGraph(selectedMovies)
         d3.selectAll(".brush_column").remove()
