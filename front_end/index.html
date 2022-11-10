@@ -6,67 +6,67 @@
     <title>The Movie Database</title>
     <script src="js/lib/d3.min.js"></script>
     <script type="module" src="js/main.js"></script>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css"/>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 </head>
 
 <body>
-    <div class="container" style="flex-direction: column">
-        <div class="container" style="flex-direction: row">
-            <div id="mdsPlot" class="page_box scatter_plt">
-                <div style="display: flex;justify-content: space-between;">
-                    <div><a>MDS Graph</a></div>
-                    <div><a style="text-align: right">
-                            Mode:
-                            <input type="radio" id="zoomMode" name="mode" checked>
-                            <label for="zoomMode">Zoom</label>
-                            <input type="radio" id="selectMode" name="mode">
-                            <label for="selectMode">Select</label>
+<div class="container" style="flex-direction: column">
+    <div class="container" style="flex-direction: row">
+        <div id="mdsPlot" class="page_box scatter_plt">
+            <div style="display: flex;justify-content: space-between;">
+                <div><a>MDS Graph</a></div>
+                <div><a style="text-align: right">
+                    Mode:
+                    <input type="radio" id="zoomMode" name="mode" checked>
+                    <label for="zoomMode">Zoom</label>
+                    <input type="radio" id="selectMode" name="mode">
+                    <label for="selectMode">Select</label>
 
-                        </a>
-                    </div>
+                </a>
                 </div>
-            </div>
-            <div id="parrallelCoords" class="page_box parrallel_coordinates_plt">
-                <a>Parallel coordinates</a>
             </div>
         </div>
-        <div class="container" style="flex-direction: row">
-            <div class="page_box bubble_plt">
-                X:<select id="bubbleXSelect"></select>
-                Y:<select id="bubbleYSelect"></select>
-                Radius:<select id="bubbleRadiusSelect">
-                    <option default value="-1">Disabled</option>
-                </select>
-                <div id="bubblePlot"></div>
-                <div class="container" style="align-items: center">
-                    <input type="checkbox" id="filterByYear">
-                    <label class="flex_item" for="filterByYear" style="white-space: nowrap">Filter by year</label>
-                    <button class="flex_item" id="yearPlay">Play</button>
-                    <input type="range" class="slider" id="yearRange">
-                </div>
+        <div id="parrallelCoords" class="page_box parrallel_coordinates_plt">
+            <a>Parallel coordinates</a>
+        </div>
+    </div>
+    <div class="container" style="flex-direction: row">
+        <div class="page_box bubble_plt">
+            X:<select id="bubbleXSelect"></select>
+            Y:<select id="bubbleYSelect"></select>
+            Radius:<select id="bubbleRadiusSelect">
+            <option default value="-1">Disabled</option>
+        </select>
+            <div id="bubblePlot"></div>
+            <div class="container" style="align-items: center">
+                <input type="checkbox" id="filterByYear">
+                <label class="flex_item" for="filterByYear" style="white-space: nowrap">Filter by year</label>
+                <button class="flex_item" id="yearPlay">Play</button>
+                <input type="range" class="slider" id="yearRange">
             </div>
-            <div class="page_box column_plt">
-                X:<select id="columnXSelect"></select>
-                <div id="columnPlot">
+        </div>
+        <div class="page_box column_plt">
+            X:<select id="columnXSelect"></select>
+            <div id="columnPlot">
 
-                </div>
-                <div class="container" id="column_legend">
-                </div>
-                <div id="slider-range"></div>
             </div>
-            <div class="page_box selected_movies_list">
-                <a>Selected movies</a>
-                <div id="selectedMovie">
-                    <p id="noMovieSelected">No movies selected</p>
-                    <ul id="ulMovieList">
-                    </ul>
-                </div>
+            <div class="container" id="column_legend">
+            </div>
+            <div id="slider-range"></div>
+        </div>
+        <div class="page_box selected_movies_list">
+            <a>Selected movies</a>
+            <div id="selectedMovie">
+                <p id="noMovieSelected">No movies selected</p>
+                <ul id="ulMovieList">
+                </ul>
             </div>
         </div>
     </div>
+</div>
 </body>
 
 </html>

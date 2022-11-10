@@ -1,4 +1,5 @@
 import { Graph } from "./Graph.js";
+import {tickValuesFormatter} from "../common/utils.js";
 
 const defaultColor = "#2c7bb6"
 const selectedColor = "#d7191c"
@@ -123,21 +124,6 @@ class BubblePlot extends Graph {
         return keys
     }
 
-
-    tickValuesFormatter(value, index) {
-        let strValue
-        if (value / 1000000000 > 1)
-            strValue = (value / 1000000000).toFixed(1) + "B"
-        else if (value / 1000000 > 1)
-            strValue = (value / 1000000).toFixed(1) + "M"
-        else if (value / 1000 > 1)
-            strValue = (value / 1000).toFixed(1) + "K"
-        else
-            strValue = value.toFixed(1)
-        return strValue.replace(/\.0/, '');
-    }
-
-
     animateSlider(graphRefreshFunction) {
         const yearRange = d3.select("#yearRange")
         const yearPlayButton = d3.select("#yearPlay")
@@ -202,7 +188,7 @@ class BubblePlot extends Graph {
         if (xSelectedField === "release_year")
             xAxis.call(d3.axisBottom(this.xScaleLinear));
         else
-            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(this.tickValuesFormatter))
+            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(tickValuesFormatter))
 
 
         // Add Y axis
@@ -215,7 +201,7 @@ class BubblePlot extends Graph {
         if (ySelectedField === "release_year")
             yAxis.call(d3.axisLeft(this.yScaleLinear))
         else
-            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(this.tickValuesFormatter))
+            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatter))
 
         let z;
         if (radiusSelectedField === undefined) {//Disabled
