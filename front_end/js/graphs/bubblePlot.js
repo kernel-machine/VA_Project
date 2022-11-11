@@ -1,4 +1,4 @@
-import { Graph } from "./Graph.js";
+import {Graph} from "./Graph.js";
 import {tickValuesFormatter} from "../common/utils.js";
 
 const defaultColor = "#2c7bb6"
@@ -20,6 +20,16 @@ class BubblePlot extends Graph {
         'budget': "Budget"
     }
 
+    measureUnits = {
+        'popularity': "",
+        'vote_avg': "",
+        'vote_count': "",
+        'revenue': "($)",
+        "runtime": "(Minutes)",
+        "release_year": "",
+        'budget': "($)"
+    }
+
     constructor(movies) {
         super()
         this.movies = movies
@@ -27,15 +37,15 @@ class BubblePlot extends Graph {
         this.selectedMovies = [];
         this.highlightedIds = []
 
-        const margin = { top: 20, right: 0, bottom: 20, left: 45 }
+        const margin = {top: 20, right:30, bottom: 40, left: 50}
 
         const bboxSize = d3.select("#bubblePlot").node().getBoundingClientRect()
-        this.width = (bboxSize.width * 0.9)
+        this.width = bboxSize.width - margin.right - margin.left
         this.height = (this.width / 2)
 
         let svg = d3.select("#bubblePlot")
             .append("svg")
-            .attr("width", bboxSize.width + margin.right + margin.left)
+            .attr("width", bboxSize.width)
             .attr("height", this.height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -203,6 +213,25 @@ class BubblePlot extends Graph {
         else
             yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatter))
 
+
+        svg.selectAll(".labels").remove()
+        const yLabel = this.niceNames[ySelectedField] + " " + this.measureUnits[ySelectedField]
+        yAxis.append("text")
+            .attr("class", "labels")
+            .text(yLabel)
+            .style("fill", "black")
+            .attr("transform", "rotate(90)")
+            .attr("y", 47.5)
+            .attr("x", (this.height / 2) + (yLabel.length / 2) * 2.8)
+
+        const xLabel = this.niceNames[xSelectedField] + " " + this.measureUnits[xSelectedField]
+        xAxis.append("text")
+            .attr("class", "labels")
+            .text(xLabel)
+            .style("fill", "black")
+            .attr("y", 40)
+            .attr("x", this.width / 2)
+
         let z;
         if (radiusSelectedField === undefined) {//Disabled
             z = function (a) {
@@ -297,7 +326,6 @@ class BubblePlot extends Graph {
     }
 
 
-
     colorElement(movieId, color) {
         d3.select("#dot" + movieId).style("fill", color)
             .raise()
@@ -308,4 +336,4 @@ class BubblePlot extends Graph {
     }
 }
 
-export { BubblePlot }
+export {BubblePlot}
