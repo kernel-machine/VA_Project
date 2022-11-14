@@ -17,7 +17,13 @@
     <p id="title">Title</p>
     <a id="director">Director</a>
 </div>
-<div class="container" style="flex-direction: column">
+<div id="loadingDiv">
+    <div class="loader"></div>
+    <div>
+        <p id="loadingText">Loading...</p>
+    </div>
+</div>
+<div class="container" id="mainContainer" style="flex-direction: column; opacity: 0">
     <div class="container" style="flex-direction: row">
         <div id="mdsPlot" class="page_box scatter_plt">
             <div style="display: flex;justify-content: space-between;">
