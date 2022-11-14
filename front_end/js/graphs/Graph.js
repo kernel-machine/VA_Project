@@ -36,9 +36,9 @@ export class Graph {
     }
 
     /**
-    * Call it when you want to cancel the whole selection
-    *
-    */
+     * Call it when you want to cancel the whole selection
+     *
+     */
     clearSelection() {
         this.selectedElements = []
         this.selectionIsActive = false
@@ -47,11 +47,11 @@ export class Graph {
     }
 
     /**
-    * Highlights the selected movies in the graph
-    * Call when the selection is made by another graph
-    *
-    * @param {array} idElements array of movie ids
-    */
+     * Highlights the selected movies in the graph
+     * Call when the selection is made by another graph
+     *
+     * @param {array} idElements array of movie ids
+     */
     highlightElements(idElements) {
         this.highlightedElements = idElements
         if (this.selectionIsActive || this.highlightedElements.length > 0)
@@ -64,21 +64,25 @@ export class Graph {
         })
     }
 
-    hoverAnElement(filmId) {
+    hoverAnElement(filmId, send_event = true) {
         this.colorElement(filmId, this.hoverColor)
+        if (send_event)
+            this.selectionTool.setHoveredElement(filmId, this)
     }
 
-    leaveAnElement(filmId) {
-        if (this.highlightedElements.some(x => x == filmId))
+    leaveAnElement(filmId, send_event = true) {
+        if (this.highlightedElements.some(x => x == filmId)) {
             this.colorElement(filmId, this.selectedColor)
+        }
         else if (this.selectionIsActive || this.highlightedElements.length > 0) {
             this.colorElement(filmId, this.unselectedColor)
         }
         else {
             this.colorElement(filmId, this.defaultColor)
+            if (send_event)
+                this.selectionTool.unsetHoveredElement(filmId)
         }
     }
-
 
 
     colorElement(movieId, color) {
