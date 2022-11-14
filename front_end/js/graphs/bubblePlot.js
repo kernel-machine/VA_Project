@@ -1,10 +1,7 @@
 import {Graph} from "./Graph.js";
-import {tickValuesFormatter} from "../common/utils.js";
+import {hideMovieInfo, showMovieInfo, tickValuesFormatter} from "../common/utils.js";
 
 const defaultColor = "#2c7bb6"
-const selectedColor = "#d7191c"
-const hoverColor = "#fdae61"
-const unselectedColor = "#abd9e9"
 
 class BubblePlot extends Graph {
 
@@ -235,7 +232,7 @@ class BubblePlot extends Graph {
         let z;
         if (radiusSelectedField === undefined) {//Disabled
             z = function (a) {
-                return 2;
+                return 5;
             };
         }
         else {
@@ -287,10 +284,13 @@ class BubblePlot extends Graph {
                 .on('mouseover', e => {
                     const filmId = e.target.id.replace("dot", "")
                     this.hoverAnElement(filmId)
+                    const movie = this.movies.find(x=>x.id==filmId)
+                    showMovieInfo(movie,e.pageX,e.pageY)
                 })
                 .on('mouseleave', e => {
                     const filmId = e.target.id.replace("dot", "")
                     this.leaveAnElement(filmId)
+                    hideMovieInfo()
                 })
         }
 

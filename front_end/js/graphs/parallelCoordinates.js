@@ -1,4 +1,5 @@
-import { Graph } from "./Graph.js";
+import {Graph} from "./Graph.js";
+import {hideMovieInfo, showMovieInfo} from "../common/utils.js";
 
 class ParallelCoordinates extends Graph {
 
@@ -30,7 +31,7 @@ class ParallelCoordinates extends Graph {
         this.selectedMovies = [];
         this.highlightedIds = []
 
-        const margin = { top: 30, right: 10, bottom: 10, left: 0 }
+        const margin = {top: 30, right: 10, bottom: 10, left: 0}
 
         const bboxSize = d3.select("#parrallelCoords").node().getBoundingClientRect()
         this.width = (bboxSize.width) + margin.left + margin.bottom
@@ -141,11 +142,13 @@ class ParallelCoordinates extends Graph {
                 const film_id = selectedLine.replace("line", "")
                 this.hoverAnElement(film_id)
                 this.raiseAxis()
+                showMovieInfo(this.originalData.find(x => x.id == film_id), d.pageX, d.pageY)
             })
             .on("mouseleave", d => {
                 const selectedLine = d.target.id
                 const movieId = selectedLine.replace("line", "")
                 this.leaveAnElement(movieId)
+                hideMovieInfo()
             })
 
 
@@ -299,20 +302,19 @@ class ParallelCoordinates extends Graph {
         this.dimensions.forEach(d => {
             d3.select("#brush" + d).call(
                 this.yDomain[d].brush =
-                d3.brushY()
-                    .extent([[-10, 0], [10, this.height]])
-                    .on("brush", (e) => this.brushStart(e))
-                    .on("end", (e) => {
-                        if (e.selection == null) {
-                            this.clearSelection()
-                        }
-                    })
+                    d3.brushY()
+                        .extent([[-10, 0], [10, this.height]])
+                        .on("brush", (e) => this.brushStart(e))
+                        .on("end", (e) => {
+                            if (e.selection == null) {
+                                this.clearSelection()
+                            }
+                        })
             )
         })
     }
 
 
-
 }
 
-export { ParallelCoordinates }
+export {ParallelCoordinates}

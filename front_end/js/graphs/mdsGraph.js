@@ -1,4 +1,5 @@
 import { Graph } from "./Graph.js";
+import {hideMovieInfo, showMovieInfo} from "../common/utils.js";
 
 
 export class MDSGraph extends Graph {
@@ -51,7 +52,7 @@ export class MDSGraph extends Graph {
             .call(d3.axisLeft(this.yScaleLinear))
 
 
-        let clip = this.graph.append("defs").append("SVG:clipPath")
+        this.graph.append("defs").append("SVG:clipPath")
             .attr("id", "clip")
             .append("SVG:rect")
             .attr("width", this.width)
@@ -107,10 +108,12 @@ export class MDSGraph extends Graph {
             .on('mouseover', e => {
                 const filmId = e.target.id.replace("mdsDot", "")
                 this.hoverAnElement(filmId)
+                showMovieInfo(this.movies.find(x=>x.id==filmId),e.pageX,e.pageY)
             })
             .on('mouseleave', e => {
                 const filmId = e.target.id.replace("mdsDot", "")
                 this.leaveAnElement(filmId)
+                hideMovieInfo()
             })
     }
 

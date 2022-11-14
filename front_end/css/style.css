@@ -134,3 +134,17 @@
 #noMovieSelected {
     margin: 10px;
 }
+
+#infoBox {
+    background-color: red;
+    display: table;
+    padding: 5px;
+    position: fixed;
+    z-index: 1;
+    opacity: 0;
+}
+
+#infoBox > p {
+    margin: 0;
+    font-size: 16pt;
+}
