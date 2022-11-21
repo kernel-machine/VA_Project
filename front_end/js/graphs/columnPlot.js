@@ -318,6 +318,7 @@ export class ColumnPlot extends Graph {
 
         this.yAxis.append("text")
             .text("Amount")
+            .text("Amount")
             .style("fill", "black")
             .attr("transform", "rotate(90)")
             .attr("y", 40)
@@ -337,7 +338,7 @@ export class ColumnPlot extends Graph {
             .enter().append("rect")
             .attr("x", d => this.xScaleLinear(d.data.selElement) - width / 2)
             .attr("y", d => this.yAxisLinear(d[1]))
-            .transition().duration(1000)
+            .transition().duration(400)
             .attr("height", d => this.yAxisLinear(d[0]) - this.yAxisLinear(d[1]))
             .attr("width", width)
             .attr("class", "bars")
