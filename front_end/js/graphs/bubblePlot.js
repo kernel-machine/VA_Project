@@ -240,7 +240,7 @@ class BubblePlot extends Graph {
             .attr("class", "labels")
             .text(xLabel)
             .style("fill", "black")
-            .attr("y", 40)
+            .attr("y", 35)
             .attr("x", this.width / 2)
 
         const yearRange = document.getElementById("yearRange")
