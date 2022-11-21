@@ -6,17 +6,21 @@ export function range(start, end, step = 1) {
     return ris
 }
 
-export function tickValuesFormatter(value) {
+export function tickValuesFormatter(value, decimalValue = 1) {
     let strValue
     if (value / 1000000000 > 1)
-        strValue = (value / 1000000000).toFixed(1) + "B"
+        strValue = (value / 1000000000).toFixed(decimalValue) + "B"
     else if (value / 1000000 > 1)
-        strValue = (value / 1000000).toFixed(1) + "M"
+        strValue = (value / 1000000).toFixed(decimalValue) + "M"
     else if (value / 1000 > 1)
-        strValue = (value / 1000).toFixed(1) + "K"
+        strValue = (value / 1000).toFixed(decimalValue) + "K"
     else
-        strValue = value.toFixed(1)
+        strValue = value.toFixed(decimalValue)
     return strValue.replace(/\.0/, '');
+}
+
+export function tickValuesFormatterSimple(value) {
+    return tickValuesFormatter(value, 1)
 }
 
 export function showMovieInfo(movie, x, y) {
@@ -31,4 +35,32 @@ export function showMovieInfo(movie, x, y) {
 export function hideMovieInfo() {
     d3.select("#infoBox")
         .style("opacity", 0)
+}
+
+export function groupBy(list, keyGetter) {
+    const map = new Map();
+    list.forEach((item) => {
+        const key = keyGetter(item);
+        const collection = map.get(key);
+        if (!collection) {
+            map.set(key, [item]);
+        }
+        else {
+            collection.push(item);
+        }
+    });
+    return map;
+}
+
+/**
+ * Returns the inverted color
+ *
+ * @param {String} color input color as hex #aabbcc
+ * @return {String} the inverted color as hex "#aabbcc
+ */
+export function invertedColor(color) {
+    const newColor = d3.color(color)
+    if (newColor.r + newColor.g + newColor.b > 500)
+        return d3.color("black").formatHex()
+    else return d3.color("white").formatHex()
 }

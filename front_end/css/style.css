@@ -34,7 +34,7 @@
 }
 
 .bubble_plt {
-    width: 33%;
+    width: 42%;
 }
 
 .column_plt {
@@ -43,7 +43,7 @@
 }
 
 .selected_movies_list {
-    width: 33%;
+    width: 25%;
 }
 
 .line {
@@ -130,7 +130,6 @@
 }
 
 .bubbleDot {
-    fill: #7992e8;
     opacity: 0.7;
 }
 
