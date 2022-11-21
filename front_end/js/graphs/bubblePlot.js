@@ -1,5 +1,14 @@
 import {Graph} from "./Graph.js";
-import {hideMovieInfo, showMovieInfo, tickValuesFormatter} from "../common/utils.js";
+import {
+    groupBy,
+    hideMovieInfo,
+    invertedColor,
+    range,
+    showMovieInfo,
+    tickValuesFormatter,
+    tickValuesFormatterSimple
+} from "../common/utils.js";
+import {Group} from "../common/Group.js";
 
 const defaultColor = "#2c7bb6"
 
@@ -34,18 +43,18 @@ class BubblePlot extends Graph {
         this.selectedMovies = [];
         this.highlightedIds = []
 
-        const margin = {top: 20, right:30, bottom: 40, left: 50}
+        this.margin = {top: 20, right: 180, bottom: 40, left: 50}
 
         const bboxSize = d3.select("#bubblePlot").node().getBoundingClientRect()
-        this.width = bboxSize.width - margin.right - margin.left
+        this.width = bboxSize.width - this.margin.right - this.margin.left
         this.height = (this.width / 2)
 
         let svg = d3.select("#bubblePlot")
             .append("svg")
             .attr("width", bboxSize.width)
-            .attr("height", this.height + margin.top + margin.bottom)
+            .attr("height", this.height + this.margin.top + this.margin.bottom)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
             .call(d3.brush()
                 .on("brush", (e) => this.onBrush(e))
                 .on("end", (e) => {
@@ -169,8 +178,6 @@ class BubblePlot extends Graph {
     }
 
     //Create the graph, if there is still a graph, it deletes and create a new one
-
-
     updateGraph(svg, isAnUpdate) {
 
         const xSelect = document.getElementById("bubbleXSelect")
@@ -180,7 +187,14 @@ class BubblePlot extends Graph {
 
         const xSelectedField = this.keys[xSelect.value]
         const ySelectedField = this.keys[ySelect.value]
-        const radiusSelectedField = this.keys[radiusSelect.value]
+        const groupSelectedField = this.keys[radiusSelect.value]
+
+        if (radiusSelect.value >= 0) {
+            svg.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
+        }
+        else
+            svg.attr("transform", "translate(" + ((this.margin.left / 2) + (this.margin.right / 2)) + "," + this.margin.top + ")")
+
 
         d3.selectAll(".bubbleAxis")
             .remove()
@@ -195,7 +209,7 @@ class BubblePlot extends Graph {
         if (xSelectedField === "release_year")
             xAxis.call(d3.axisBottom(this.xScaleLinear));
         else
-            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(tickValuesFormatter))
+            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(tickValuesFormatterSimple))
 
 
         // Add Y axis
@@ -208,7 +222,7 @@ class BubblePlot extends Graph {
         if (ySelectedField === "release_year")
             yAxis.call(d3.axisLeft(this.yScaleLinear))
         else
-            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatter))
+            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatterSimple))
 
 
         svg.selectAll(".labels").remove()
@@ -229,38 +243,15 @@ class BubblePlot extends Graph {
             .attr("y", 40)
             .attr("x", this.width / 2)
 
-        let z;
-        if (radiusSelectedField === undefined) {//Disabled
-            z = function (a) {
-                return 5;
-            };
-        }
-        else {
-            z = d3.scaleLinear()
-                .domain(d3.extent(this.movies.map(movie => movie[radiusSelectedField])))
-                .range([1, 20]);
-        }
-
         const yearRange = document.getElementById("yearRange")
         let filteredData = checkboxByYear.checked ?
             this.movies.filter(x => x.release_year == yearRange.value) : this.movies
 
-        if (isAnUpdate) {
-            svg.selectAll(".bubbleDot")
-                .transition().duration(1000)
-                .attr("cx", d => {
-                    return this.xScaleLinear(d[xSelectedField])
-                })
-                .attr("cy", (d) => {
-                    return this.yScaleLinear(d[ySelectedField])
-                })
-                .attr("r", (d) => {
-                    return z(d[radiusSelectedField]);
-                })
-        }
-        else {
+        svg.selectAll(".bubbleDot").remove()
+        svg.selectAll(".bubbleLegend").remove()
+
+        if (groupSelectedField === undefined) {//Disabled
             // Add dots
-            svg.selectAll(".bubbleDot").remove()
             svg.append('g')
                 .selectAll("dot")
                 .data(filteredData)
@@ -276,27 +267,150 @@ class BubblePlot extends Graph {
                     return "dot" + d['id']
                 })
                 .attr("r", (d) => {
-                    return z(d[radiusSelectedField]);
+                    return "5";
                 })
                 .style("stroke", "black")
                 .style("fill", defaultColor)
                 .attr("class", "bubbleDot")
-                .on('mouseover', e => {
-                    const filmId = e.target.id.replace("dot", "")
-                    this.hoverAnElement(filmId)
-                    const movie = this.movies.find(x=>x.id==filmId)
-                    showMovieInfo(movie,e.pageX,e.pageY)
+        }
+        else {
+            const groupsNumber = 10
+            const extent = d3.extent(this.movies.map(movie => movie[groupSelectedField]))
+            const startValue = extent[0]
+            const endValue = extent[1]
+            const stepAmount = (endValue - startValue) / groupsNumber
+            const groups = []
+            for (let i = startValue; i < endValue; i += stepAmount) {
+                const intervalStart = Math.floor(i)
+                const intervalEnd = Math.floor(i + stepAmount)
+                const filteredMovie = filteredData.filter(x => x[groupSelectedField] >= intervalStart && x[groupSelectedField] < intervalEnd)
+                if (filteredMovie.length > 0) {
+                    const group = new Group(intervalStart, intervalEnd, filteredMovie)
+                    groups.push(group)
+                }
+            }
+
+            const output = [5, 10, 17.5, 25, 35]
+            const radiusScale = d3.scaleQuantile()
+                .domain(groups.map(x => x.getElementCount()))
+                .range(output)
+
+            const colorScale = d3.scaleSequential()
+                .domain(d3.extent(range(0, groups.length)))
+                .interpolator(d3.interpolateGnBu);
+
+            // Add dots
+            svg.append('g')
+                .selectAll("dot")
+                .data(groups)
+                .enter()
+                .append("circle")
+                .attr("cx", (d) => {
+                    return this.xScaleLinear(d.getAvgField(xSelectedField))
                 })
-                .on('mouseleave', e => {
-                    const filmId = e.target.id.replace("dot", "")
-                    this.leaveAnElement(filmId)
-                    hideMovieInfo()
+                .attr("cy", (d) => {
+                    return this.yScaleLinear(d.getAvgField(xSelectedField))
                 })
+                .attr("id", (d) => {
+                    return "dot" + d['id']
+                })
+                .attr("r", (d) => {
+                    return radiusScale(d.getElementCount());
+                })
+                .style("stroke", "black")
+                .attr("class", "bubbleDot")
+                .style("fill", (d) => {
+                    const color = d3.color(colorScale(groups.indexOf(d)))
+                    return color.formatHex()
+                })
+
+            const a = groups.map(x => {
+                let out = {}
+                out.amount = x.getElementCount()
+                out.radius = radiusScale(x.getElementCount())
+                return out
+            }).sort((a, b) => a.radius - b.radius).reverse()
+            const grouped = groupBy(a, e => e.radius)
+
+            //Draw circles
+            let yOffset = 20
+            const largerRadius = d3.max(Array.from(grouped.keys()))
+            grouped.forEach((val, key) => {
+                const radius = key
+                svg.append("circle")
+                    .attr("class", "bubbleLegend")
+                    .style("stroke", "black")
+                    .attr("cx", this.width + 50)
+                    .attr("cy", yOffset)
+                    .attr("r", radius)
+                svg.append("text")
+                    .attr("class", "bubbleLegend")
+                    .attr("text-anchor", "middle")
+                    .text(d3.extent(val.map(x => x.amount)).join("-"))
+                    .style("fill", "black")
+                    .attr("x", this.width + 15 + largerRadius)
+                    .attr("y", yOffset + radius + 15)
+                yOffset += 2 * radius + 20
+            })
+
+            //Draw colors
+            const height = this.height / 10
+            svg.append("g").selectAll(".bubbleLegend")
+                .data(groups)
+                .enter()
+                .append("rect")
+                .attr("class", "bubbleLegend")
+                .style("stroke", "black")
+                .style("fill", (d) => d3.color(colorScale(groups.indexOf(d))).formatHex())
+                .attr("width", 80)
+                .attr("height", height)
+                .attr("x", this.width + 60 + largerRadius)
+                .attr("y", (d) => groups.indexOf(d) * height)
+            svg.append("g")
+                .selectAll(".bubbleLegend")
+                .data(groups)
+                .enter()
+                .append("text")
+                .text(d => d.getIntervalString(groupSelectedField !== "release_year"))
+                .attr("class", "bubbleLegend")
+                .style("font-size", "8pt")
+                .style("fill", d => invertedColor(d3.color(colorScale(groups.indexOf(d))).formatHex()))
+                .attr("text-anchor", "middle")
+                .attr("x", this.width + 60 + largerRadius + 40)
+                .attr("y", (d) => groups.indexOf(d) * height + height / 2 + 4)
         }
 
-        this.updateSelection()
-    }
+        /*
+        if (isAnUpdate) {
+            svg.selectAll(".bubbleDot")
+                .transition().duration(1000)
+                .attr("cx", d => {
+                    return this.xScaleLinear(d[xSelectedField])
+                })
+                .attr("cy", (d) => {
+                    return this.yScaleLinear(d[ySelectedField])
+                })
+                .attr("r", (d) => {
+                    return z(d[groupSelectedField]);
+                })
+        }
+        else {*/
+        /*
+            .on('mouseover', e => {
+                const filmId = e.target.id.replace("dot", "")
+                this.hoverAnElement(filmId)
+                const movie = this.movies.find(x => x.id == filmId)
+                showMovieInfo(movie, e.pageX, e.pageY)
+            })
+            .on('mouseleave', e => {
+                const filmId = e.target.id.replace("dot", "")
+                this.leaveAnElement(filmId)
+                hideMovieInfo()
+            })*/
+        //}
 
+        // this.updateSelection()
+    }
 
     onBrush(e) {
         const xSelect = document.getElementById("bubbleXSelect")
