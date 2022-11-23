@@ -1,5 +1,6 @@
-/data_processing/env
+/data_processing/venv
 /.idea
 /data_processing/similarity.npy
 /data_processing/kaggle/*
 /data_processing/dataset.json
+kaggle/the-movies-dataset.zip

@@ -5,11 +5,10 @@ import json
 import multiprocessing
 import os
 from datetime import datetime
-from math import isnan
+from math import isnan, sqrt, pow, exp
 from os.path import exists
 from sklearn.manifold import MDS
 
-import nltk
 import numpy as np
 import pandas as pd
 import kaggle
@@ -19,7 +18,8 @@ import zipfile
 def download_dataset():
     kaggle.api.authenticate()
     print("Downloading dataset")
-    kaggle.api.dataset_download_files('rounakbanik/the-movies-dataset', path="./kaggle")
+    kaggle.api.dataset_download_files(
+        'rounakbanik/the-movies-dataset', path="./kaggle")
     print("Unzipping")
     with zipfile.ZipFile('./kaggle/the-movies-dataset.zip', 'r') as zipref:
         zipref.extractall('./kaggle/')
@@ -33,22 +33,25 @@ if __name__ == '__main__':
         exit(-1)
 
     if exists("./kaggle"):
+        present_file = os.listdir("./kaggle")
         neededFiles = ["credits.csv", "keywords.csv", "movies_metadata.csv"]
-        os.listdir("./kaggle")
-        if not all(elem in neededFiles for elem in os.listdir("./kaggle")):
+        if all(elem in present_file for elem in neededFiles):
+            print("Files already exists")
+        else:
             print("Download needed")
             for e in glob.glob("./kaggle/*"):
                 os.remove(e)
-        else:
-            print("Files already exists")
+            download_dataset()
     else:
         os.mkdir("kaggle")
-    download_dataset()
+        download_dataset()
+
 
 movies_metadata = pd.read_csv("kaggle/movies_metadata.csv", low_memory=False)
-keywords_csv = pd.read_csv("kaggle/keywords.csv", low_memory=False, index_col="id")
-credit_csv = pd.read_csv("kaggle/credits.csv", low_memory=False, index_col="id")
-nltk.download('punkt')
+keywords_csv = pd.read_csv("kaggle/keywords.csv",
+                           low_memory=False, index_col="id")
+credit_csv = pd.read_csv("kaggle/credits.csv",
+                         low_memory=False, index_col="id")
 print("Number of rows", len(movies_metadata))
 
 
@@ -66,20 +69,7 @@ def get_keywords_by_id(id):
 
 
 def checkValidity(overview_a):
-    return (isinstance(overview_a, str) or not isnan(overview_a)) and len(nltk.tokenize.word_tokenize(overview_a)) > 0
-
-
-def checkValidity2(overview_a, overview_b):
-    check_a = isinstance(overview_a, str) or not isnan(overview_a)
-    check_b = isinstance(overview_b, str) or not isnan(overview_b)
-
-    if not (check_a and check_b):
-        return False
-
-    X_list = nltk.tokenize.word_tokenize(overview_a)
-    Y_list = nltk.tokenize.word_tokenize(overview_b)
-
-    return len(X_list) > 0 and len(Y_list) > 0
+    return (isinstance(overview_a, str) or not isnan(overview_a))
 
 
 def process_chuck(thread_id, start_row, end_row, result, progress):
@@ -88,13 +78,17 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             movie_id = int(movies_metadata.at[current_row, 'id'])
             imdb_id = movies_metadata.at[current_row, 'imdb_id']
             title = movies_metadata.at[current_row, 'title']
-            genres = ast.literal_eval(movies_metadata.at[current_row, 'genres'])
+            genres = ast.literal_eval(
+                movies_metadata.at[current_row, 'genres'])
             # Format 1989-02-17
             release_data = movies_metadata.at[current_row, 'release_date']
-            release_year = datetime.strptime(str(release_data), "%Y-%m-%d").year
+            release_year = datetime.strptime(
+                str(release_data), "%Y-%m-%d").year
             runtime = float(movies_metadata.at[current_row, 'runtime'])
-            spoken_languages = ast.literal_eval(movies_metadata.at[current_row, 'spoken_languages'])
-            vote_average = float(movies_metadata.at[current_row, 'vote_average'])
+            spoken_languages = ast.literal_eval(
+                movies_metadata.at[current_row, 'spoken_languages'])
+            vote_average = float(
+                movies_metadata.at[current_row, 'vote_average'])
             vote_count = int(movies_metadata.at[current_row, 'vote_count'])
             revenue = int(movies_metadata.at[current_row, 'revenue'])
             popularity = float(movies_metadata.at[current_row, 'popularity'])
@@ -102,7 +96,7 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             overview = movies_metadata.at[current_row, 'overview']
             keywords = ast.literal_eval(get_keywords_by_id(movie_id))
             director = get_director_by_id(movie_id)
-        except ValueError:
+        except ValueError or KeyError:
             pass  # print("Wrong format")
         else:
             if vote_average > 0 and vote_count > 0 and revenue > 0 and popularity > 0 and budget > 0 \
@@ -137,73 +131,46 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
     progress[thread_id] = 100
 
 
-def computeSimilarity(overview_a, overview_b):
-    if checkValidity2(overview_a, overview_b):
-        x_list = nltk.tokenize.word_tokenize(overview_a)
-        y_list = nltk.tokenize.word_tokenize(overview_b)
-
-        # sw contains the list of stopwords
-        sw = nltk.corpus.stopwords.words('english')
-        l1 = []
-        l2 = []
-
-        # remove stop words from the string
-        x_set = {w for w in x_list if not w in sw}
-        y_set = {w for w in y_list if not w in sw}
-
-        # form a set containing keywords of both strings
-        rvector = x_set.union(y_set)
-        for w in rvector:
-            if w in x_set:
-                l1.append(1)  # create a vector
-            else:
-                l1.append(0)
-            if w in y_set:
-                l2.append(1)
-            else:
-                l2.append(0)
-        c = 0
-
-        # cosine formula
-        for i in range(len(rvector)):
-            c += l1[i] * l2[i]
-        cosine = c / float((sum(l1) * sum(l2)) ** 0.5)
-
-        return cosine
-
-    return 0
+def squared_sum(x):
+    """ return 3 rounded square rooted value """
+    return round(sqrt(sum([a*a for a in x])), 3)
 
 
-def process_chunk_similarity(start_row, end_row, shared_array, chuck_size, movies):
-    movies_len = len(movies)
-    use_overview = True
-    matrix = np.frombuffer(shared_array.get_obj(), ctypes.c_float)
-    matrix = matrix.reshape((movies_len, movies_len))
+def cos_similarity(x, y):
+    """ return cosine similarity between two lists """
+    numerator = sum(a*b for a, b in zip(x, y))
+    denominator = squared_sum(x)*squared_sum(y)
+    return round(numerator/float(denominator), 3)
 
+
+def jaccard_similarity(x, y):
+    """ returns the jaccard similarity between two lists """
+    intersection_cardinality = len(set.intersection(*[set(x), set(y)]))
+    union_cardinality = len(set.union(*[set(x), set(y)]))
+    return intersection_cardinality/float(union_cardinality)
+
+
+def process_chunk_similarity(start_row, end_row, shared_array, process_id, keywords):
+    keyworkds_len = len(keywords)
+    sim_matrix = np.frombuffer(shared_array.get_obj(), ctypes.c_float)
+    sim_matrix = sim_matrix.reshape((keyworkds_len, keyworkds_len))
+
+    '''
+    Each process process a set of rows
+    '''
     for row in range(start_row, end_row):
-        if use_overview:
-            first_movie_overviews = movies[row]['overview']
-        else:
-            first_movie_overviews = " ".join(
-                list(map(lambda x: x['name'], movies[row]['keywords'])))
-
-        for col in range(len(matrix[row])):
+        for col in range(len(keywords)):
             # Since the similarity matrix is specular, you can take the specular value if it's already computed
-            if matrix[col][row] == 0:
-                if use_overview:
-                    second_movie_overviews = movies[col]['overview']
-                else:
-                    second_movie_overviews = " ".join(
-                        list(map(lambda x: x['name'], movies[col]['keywords'])))
-                sim = computeSimilarity(
-                    first_movie_overviews, second_movie_overviews)
-                matrix[row][col] = sim
+            if sim_matrix[col][row] == 0:
+                a_keywords = list(map(lambda x: x['id'], keywords[row]))
+                b_keywords = list(map(lambda x: x['id'], keywords[col]))
+                sim_matrix[row][col] = jaccard_similarity(a_keywords,b_keywords)
             else:
-                matrix[row][col] = matrix[col][row]
+                sim_matrix[row][col] = sim_matrix[col][row]
 
         if row % 10 == 0:
-            print("PROCESS OF CHUCK", start_row // chuck_size,
-                  "AT", row - start_row, "OF", end_row - start_row)
+            print("PROCESS N°:", process_id,
+                  "AT: {:.2f}%".format(100*((row - start_row)/(end_row - start_row))))
 
 
 if __name__ == '__main__':
@@ -250,35 +217,38 @@ if __name__ == '__main__':
         print("Movies size", len(moviesDict['movies']))
         with open(filename, 'w') as outfile:
             json.dump(moviesDict, outfile, allow_nan=False, indent=1)
-            print("Writing in " + filename)
-
-    movies = json.load(open(filename))['movies']
-    movies.sort(key=lambda x: x['id'])
-
-    print("ENDED STEP 1")
+            print("Written in " + filename)
 
     filename = "similarity.npy"
     if exists(filename):
-        print("Skipping step 2")
+        print("Similarity already computed")
     else:
-        print("STARTING STEP 2")
-        movies_len = len(movies)
-        sim_array = multiprocessing.Array('f', movies_len * movies_len)
-        nltk.download('all')
+        print("Computing similairty")
+        ds_file = open("dataset.json")
+        ds_json = json.load(ds_file)
 
+        keywords = list(map(lambda x: x['keywords'], ds_json['movies']))
+        ds_file.close()
+
+        keywords_len = len(keywords)
+        sim_array = multiprocessing.Array('f', keywords_len * keywords_len)
         cpu_cores = multiprocessing.cpu_count()
-        chuck_size = movies_len // cpu_cores
+        chuck_size = keywords_len // cpu_cores
         processes = []
 
         for i in range(cpu_cores):
+            startIndex = chuck_size * i
+            endIndex = chuck_size * (i + 1)
             p = multiprocessing.Process(target=process_chunk_similarity,
-                                        args=(chuck_size * i, chuck_size * (i + 1), sim_array, chuck_size, movies))
+                                        args=(startIndex, endIndex, sim_array, i, keywords))
             processes.append(p)
 
-        if movies_len > chuck_size * cpu_cores:
+        if keywords_len > chuck_size * cpu_cores:
+            startIndex = chuck_size * cpu_cores
+            endIndex = keywords_len
             p = multiprocessing.Process(target=process_chunk_similarity,
                                         args=(
-                                            chuck_size * cpu_cores, movies_len, sim_array, 1, movies))
+                                            startIndex, endIndex, sim_array, cpu_cores, keywords))
             processes.append(p)
 
         for p in processes:
@@ -287,26 +257,28 @@ if __name__ == '__main__':
         for p in processes:
             p.join()
 
-        print("END")
         arr = np.frombuffer(sim_array.get_obj(), ctypes.c_float)
-        arr = arr.reshape((movies_len, movies_len))
-
+        arr = arr.reshape((keywords_len, keywords_len))
         np.save(filename, arr)
+        print("Similairty matrix written")
 
     filename = "msd_reduction.csv"
     if exists(filename):
         print("Skipping mds computation")
     else:
-        sim_matrix = np.load("similarity.npy")
+        sim_matrix = np.load("similarity.npy").clip(0, 1)
         sim_matrix = 1 - sim_matrix
-        embedding = MDS(verbose=2, dissimilarity='precomputed',
-                        n_jobs=-1, max_iter=3000, eps=1e-9)
+        embedding = MDS(
+            max_iter=1000, dissimilarity="precomputed", n_jobs=-1, verbose=2, eps=1e-6)
         transformed = embedding.fit(sim_matrix)
         pos = embedding.embedding_
 
-        for e in range(len(movies)):
-            movies[e]['mds'] = list(pos[e])
+        ds_file = open("dataset.json")
+        ds_json = json.load(ds_file)['movies']
+        for e in range(len(ds_json)):
+            ds_json[e]['mds'] = list(pos[e])
+        ds_file.close()
 
-        moviesDict = {'movies': movies}
+        moviesDict = {'movies': ds_json}
         with open("dataset.json", 'w') as outfile:
             json.dump(moviesDict, outfile, allow_nan=False, indent=1)
