@@ -443,7 +443,8 @@ class BubblePlot extends Graph {
     }
 
     highlightElements(idElements) {
-        if (document.getElementById("bubbleRadiusSelect") < 0) {
+        if (document.getElementById("bubbleRadiusSelect").value < 0) {
+            //Are there not grouped
             super.highlightElements(idElements);
         }
         else {
