@@ -13,8 +13,6 @@ const defaultColor = "#2c7bb6"
 
 class BubblePlot extends Graph {
 
-    name = "Bubble Plot"
-
     niceNames = {
         'popularity': "Popularity",
         'vote_avg': "Average rate",
@@ -36,7 +34,7 @@ class BubblePlot extends Graph {
     }
 
     constructor(movies) {
-        super()
+        super("Bubble Plot")
         this.movies = movies
         this.keys = this.makeUI()
         this.selectedMovies = [];

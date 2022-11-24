@@ -29,7 +29,7 @@ export class ColumnPlot extends Graph {
     }
 
     constructor(movies) {
-        super();
+        super("Column plot");
         this.movies = movies
 
         const margin = {top: 10, right: 45, bottom: 80, left: 45}

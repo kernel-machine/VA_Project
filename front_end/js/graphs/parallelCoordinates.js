@@ -3,8 +3,6 @@ import {hideMovieInfo, showMovieInfo} from "../common/utils.js";
 
 class ParallelCoordinates extends Graph {
 
-    name = "Parallel coordinates plot"
-
     prettyDimensionsName = {
         'genres': "Genres",
         "year": "Year",
@@ -15,7 +13,7 @@ class ParallelCoordinates extends Graph {
     }
 
     constructor(movies) {
-        super();
+        super("Parallel coordinates plot");
         this.originalData = movies;
         this.filtered_data = movies.map(x => {
             return {

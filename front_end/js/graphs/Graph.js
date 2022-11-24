@@ -8,10 +8,13 @@ export class Graph {
     unselectedColor = "#abd9e9"
 
     selectionTool = undefined;
-    name = "Graph"
     highlightedElements = []
     selectedElements = []
     selectionIsActive = false
+
+    constructor(name) {
+        this.name = name
+    }
 
     /**
      * returns the selected movies by the graph
@@ -29,7 +32,6 @@ export class Graph {
      * @param {array} selection array of movie ids
      */
     selectElements(selection) {
-        // console.log("selection",selection)
         this.selectedElements = selection
         this.selectionIsActive = true
         this.updateSelection()
@@ -79,18 +81,18 @@ export class Graph {
         }
         else {
             this.colorElement(filmId, this.defaultColor)
-            if (send_event)
-                this.selectionTool.unsetHoveredElement(filmId)
         }
+        if (send_event)
+            this.selectionTool.unsetHoveredElement(filmId)
     }
 
 
     colorElement(movieId, color) {
-        console.log("Missing implementation")
+        console.error("Missing implementation")
     }
 
     colorAllElements(color) {
-        console.log("Missing implementation")
+        console.error("Missing implementation")
     }
 
     /**

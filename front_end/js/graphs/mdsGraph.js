@@ -10,7 +10,7 @@ export class MDSGraph extends Graph {
     }
 
     constructor(movies) {
-        super()
+        super("MDS Graph")
         this.movies = movies
         this.mouseMode = this.Mode.ZoomMode
 
