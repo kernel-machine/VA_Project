@@ -8,7 +8,10 @@ export class SelectionList {
     }
 
     addMovies(list) {
-        const nameList = this.movies.filter(x => list.includes(x.id)).map(x => "<b>" + x.title + "</b> | " + x.director)
+        const nameList = this.movies.filter(x => list.includes(x.id)).map(x => {
+            console.log(x.title, x.id, x.keywords.map(x => x.name))
+            return "<b>" + x.title + "</b> | " + x.director + " " + x.id
+        })
         d3.select("#ulMovieList").selectAll("li").remove()
         if (nameList.length == 0) {
             d3.select("#noMovieSelected").style("display", "")
