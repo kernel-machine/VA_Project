@@ -29,12 +29,12 @@ export function showMovieInfo(movie, x, y) {
     d3.select("#infoBox")
         .style("top", y + 3 + "px")
         .style("left", x + 3 + "px")
-        .style("opacity", 1)
+        .style("display", "table")
 }
 
 export function hideMovieInfo() {
     d3.select("#infoBox")
-        .style("opacity", 0)
+        .style("display", "none")
 }
 
 export function groupBy(list, keyGetter) {
