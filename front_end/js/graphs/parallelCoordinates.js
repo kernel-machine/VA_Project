@@ -220,7 +220,6 @@ class ParallelCoordinates extends Graph {
     brushStart(e) {
         const upperBoundRect = e.selection[0] //LowerValue
         const lowerBoundRect = e.selection[1] //Higher value
-        console.log(lowerBoundRect, upperBoundRect)
         let selectedX = this.xScalePoint.domain()
             .find((d) => {
                 return e.target === this.yDomain[d].brush;
