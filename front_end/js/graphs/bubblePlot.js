@@ -73,6 +73,9 @@ class BubblePlot extends Graph {
         const checkboxByYear = d3.select("#filterByYear")
         const graphRefresh = () => {
             this.updateGraph(true)
+            if (this.highlightedElements.length > 0) {
+                this.highlightElements(this.highlightedElements)
+            }
         }
         xSelect.on('change', graphRefresh)
         ySelect.on('change', graphRefresh)
@@ -444,7 +447,7 @@ class BubblePlot extends Graph {
 
     highlightElements(idElements) {
         if (document.getElementById("bubbleRadiusSelect").value < 0) {
-            //Are there not grouped
+            //They are not grouped
             super.highlightElements(idElements);
         }
         else {
