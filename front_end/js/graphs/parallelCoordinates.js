@@ -174,6 +174,8 @@ class ParallelCoordinates extends Graph {
         this.axes.append("text")
             .attr("class", "parallelDimensionsText")
             .attr("y", -9)
+            .style("font-weight", "bold")
+            .style("font-size", "11pt")
             .text((d) => {
                 return this.prettyDimensionsName[d]
             })
@@ -216,8 +218,9 @@ class ParallelCoordinates extends Graph {
 
     //Called when an area is selected
     brushStart(e) {
-        const upperBoundRect = e.selection[0]
-        const lowerBoundRect = e.selection[1]
+        const upperBoundRect = e.selection[0] //LowerValue
+        const lowerBoundRect = e.selection[1] //Higher value
+        console.log(lowerBoundRect, upperBoundRect)
         let selectedX = this.xScalePoint.domain()
             .find((d) => {
                 return e.target === this.yDomain[d].brush;
@@ -264,7 +267,7 @@ class ParallelCoordinates extends Graph {
                                 this.selectedIdsBins[dimension].delete(movie.id)
                         }
                         else if (dimension === 'languages') {
-                            if (selectedElements[dimension].selection.every(selectionLanguage => movie.languages.some(ml => ml === selectionLanguage)))
+                            if (movie.languages.some(l => selectedElements[dimension].selection.includes(l)))
                                 this.selectedIdsBins[dimension].add(movie.id)
                             else
                                 this.selectedIdsBins[dimension].delete(movie.id)
