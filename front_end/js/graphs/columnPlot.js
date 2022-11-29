@@ -1,5 +1,5 @@
 import {Graph} from "./Graph.js";
-import {range, tickValuesFormatter} from "../common/utils.js";
+import {range, tickValuesFormatter, tickValuesFormatterSimple} from "../common/utils.js";
 
 class MoviesResult {
     isGrouped = false
@@ -30,7 +30,10 @@ export class ColumnPlot extends Graph {
 
     constructor(movies) {
         super("Column plot");
-        this.movies = movies
+        this.movies = movies.map(x => {
+            x.popularity = Math.round(x.popularity)
+            return x
+        })
 
         const margin = {top: 10, right: 45, bottom: 80, left: 45}
 
@@ -192,6 +195,7 @@ export class ColumnPlot extends Graph {
                     obj.sum += obj[x.name]
                     return obj
                 })
+                //obj.sum=Math.round(obj.sum)
                 return obj
             })
     }
@@ -245,14 +249,14 @@ export class ColumnPlot extends Graph {
         let spaceTaken = 0
         this.xAxis.selectAll("text")
             .attr("transform", (d, i) => {
-                const label = this.groupedMovies.result[i].textElement
+                const label = this.groupedMovies?.result[i]?.textElement
                 if (label && label.includes("-")) {
                     const length = label.length * 7
                     const offset = length / 2
                     spaceTaken = Math.max(offset, spaceTaken)
                     return "rotate(30),translate(" + offset + ",-2)"
                 }
-                else return "rotate(0),translate(0,0)"
+                else return "rotate(30),translate(0,0)"
             })
 
         this.xAxis.append("text")
@@ -275,11 +279,15 @@ export class ColumnPlot extends Graph {
         let genreGrouped = [...new Set(movies.map(x => x[xSelectedField]).sort())]
         this.groupedMovies = this.groupMoviesBySelectedField(genreGrouped, xSelectedField)
         const maxValue = d3.max(this.groupedMovies.result.map(x => x.sum))
-        const bounds = this.getXBoundsByGropedMovies(this.groupedMovies.result, xSelectedField)
+        let bounds = this.getXBoundsByGropedMovies(this.groupedMovies.result, xSelectedField)
+        if (xSelectedField == "release_year") {
+            bounds[1] += 0.5
+            bounds[0] -= 0.5
+        }
 
         this.xScaleLinear = d3.scaleLinear()
             .domain(bounds)
-            .range([0, this.width]);
+            .range([0, this.width])
 
         this.xAxis =
             this.svg.append("g")
@@ -289,7 +297,12 @@ export class ColumnPlot extends Graph {
         if (!this.groupedMovies.isGrouped) {
             const numberOfElements = Math.trunc(bounds[1]) - Math.trunc(bounds[0])
             this.xAxis.call(d3.axisBottom(this.xScaleLinear)
-                .tickFormat(d3.format("d"))
+                .tickFormat(d => {
+                    if (xSelectedField == "release_year")
+                        return d3.format("d")(d)
+                    else
+                        return tickValuesFormatterSimple(d)
+                })
                 .ticks(Math.min(20, numberOfElements)))
         }
         else {
@@ -326,7 +339,24 @@ export class ColumnPlot extends Graph {
 
         let a = d3.stack().keys(this.genres.map(x => x.name))(this.groupedMovies.result)
         this.svg.selectAll(".bars").remove()
-        const width = Math.max((this.width / this.groupedMovies.result.length) - 2, 3)
+        const minDistance = this.groupedMovies.result.map(x => x.selElement).reduce((accumulator, currentValue, currentIndex, array) => {
+            const nextIndex = currentIndex + 1;
+            const nextValue = array[nextIndex]
+            if (nextValue) {
+                const interval = Math.abs(this.xScaleLinear(nextValue) - this.xScaleLinear(currentValue))
+                accumulator = Math.min(interval, accumulator)
+            }
+            return accumulator
+        }, Infinity)
+        const spaceBetweenGroups = (this.width / this.groupedMovies.result.length) - 2
+        let width;
+        if (this.groupedMovies.isGrouped) {
+            width = spaceBetweenGroups
+        }
+        else {
+            width = minDistance * 0.95
+        }
+        width = Math.max(width, 3)
         this.bars = this.svg.append("g").attr("clip-path", "url(#clipColumn)")
         this.bars
             .selectAll("g")
