@@ -229,7 +229,8 @@ export class ColumnPlot extends Graph {
 
     getXBoundsByGropedMovies(genreGrouped, selectedField) {
         let values;
-        if (selectedField == "vote_count") {
+        console.log("H", genreGrouped)
+        if (selectedField == "vote_count" && genreGrouped.some(e => e.rangeElement != undefined)) {
             values = genreGrouped.map(e => e.rangeElement).reduce((prev, curr) => {
                 if (curr) {
                     prev.push(curr[0])
@@ -319,6 +320,7 @@ export class ColumnPlot extends Graph {
         this.groupedMovies = this.groupMoviesBySelectedField(genreGrouped, xSelectedField)
         const maxValue = d3.max(this.groupedMovies.result.map(x => x.sum))
         let bounds = this.getXBoundsByGropedMovies(this.groupedMovies.result, xSelectedField)
+        //console.log(bounds, this.groupedMovies)
         if (xSelectedField == "release_year") {
             bounds[1] += 0.5
             bounds[0] -= 0.5
