@@ -7,6 +7,8 @@ export function range(start, end, step = 1) {
 }
 
 export function tickValuesFormatter(value, decimalValue = 1) {
+    if (value == undefined)
+        return undefined
     let strValue
     if (value / 1000000000 > 1)
         strValue = (value / 1000000000).toFixed(decimalValue) + "B"

@@ -249,22 +249,61 @@ export class ColumnPlot extends Graph {
         let spaceTaken = 0
         this.xAxis.selectAll("text")
             .attr("transform", (d, i) => {
-                const label = this.groupedMovies?.result[i]?.textElement
-                if (label && label.includes("-")) {
-                    const length = label.length * 7
-                    const offset = length / 2
-                    spaceTaken = Math.max(offset, spaceTaken)
-                    return "rotate(30),translate(" + offset + ",-2)"
+                    let label = this.groupedMovies?.result[i]?.textElement
+                    if (!label)
+                        label = tickValuesFormatterSimple(d)
+                    if (label) {
+                        const length = label.length * 7
+                        const offset = length / 2
+                        spaceTaken = Math.max(offset, spaceTaken)
+                        return "rotate(30),translate(" + offset + ",-2)"
+                    }
+                    else
+                        return "rotate(0),translate(0,0)"
                 }
-                else return "rotate(30),translate(0,0)"
-            })
+            )
 
-        this.xAxis.append("text")
-            .text(this.niceNames[xSelectedField] + " " + this.measureUnits[xSelectedField])
-            .style("fill", "black")
-            .attr("transform", "rotate(0)")
-            .attr("y", 30 + spaceTaken)
-            .attr("x", this.width / 2)
+        this
+            .xAxis
+            .append(
+                "text"
+            )
+            .text(
+                this
+                    .niceNames
+                    [xSelectedField]
+                +
+                " "
+                +
+                this
+                    .measureUnits
+                    [xSelectedField]
+            )
+            .style(
+                "fill"
+                ,
+                "black"
+            )
+            .attr(
+                "transform"
+                ,
+                "rotate(0)"
+            )
+            .attr(
+                "y"
+                ,
+                30
+                +
+                spaceTaken
+            )
+            .attr(
+                "x"
+                ,
+                this
+                    .width
+                /
+                2
+            )
     }
 
     updateGraph(movies) {
