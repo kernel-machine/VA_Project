@@ -252,14 +252,14 @@ export class ColumnPlot extends Graph {
                     let label = this.groupedMovies?.result[i]?.textElement
                     if (!label)
                         label = tickValuesFormatterSimple(d)
-                    if (label) {
-                        const length = label.length * 7
-                        const offset = length / 2
-                        spaceTaken = Math.max(offset, spaceTaken)
-                        return "rotate(30),translate(" + offset + ",-2)"
-                    }
-                    else
-                        return "rotate(0),translate(0,0)"
+                if (label && xSelectedField != "vote_avg") {
+                    const length = label.length * 7
+                    const offset = length / 2
+                    spaceTaken = Math.max(offset, spaceTaken)
+                    return "rotate(30),translate(" + offset + ",-2)"
+                }
+                else
+                    return "rotate(0),translate(0,0)"
                 }
             )
 
