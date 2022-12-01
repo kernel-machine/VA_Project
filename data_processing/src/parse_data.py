@@ -86,10 +86,10 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
                 result.append(
                     {
                         "id": movie_id,
-                        "imdb_id": imdb_id,
+                        # "imdb_id": imdb_id,
                         "title": title,
                         "genres": genres,
-                        "release_data": release_data,
+                        #"release_data": release_data,
                         "release_year": release_year,
                         "runtime": runtime,
                         "spoken_languages": spoken_languages,
@@ -99,7 +99,7 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
                         "popularity": popularity,
                         "budget": budget,
                         "keywords": keywords,
-                        "overview": overview,
+                        #"overview": overview,
                         "director": director,
                     }
                 )
