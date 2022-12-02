@@ -18,7 +18,7 @@ export class MDSGraph extends Graph {
 
         const bboxSize = d3.select("#mdsPlot").node().getBoundingClientRect()
         this.width = bboxSize.width - margin.left - margin.bottom
-        this.height = (this.width / 2.1)
+        this.height = (this.width / 2.35)
 
         this.svg = d3.select("#mdsPlot")
             .append("svg")

@@ -33,7 +33,7 @@ class ParallelCoordinates extends Graph {
 
         const bboxSize = d3.select("#parrallelCoords").node().getBoundingClientRect()
         this.width = (bboxSize.width) + margin.left + margin.bottom
-        this.height = (this.width / 2.3)
+        this.height = (this.width / 2.5)
 
         this.plt = d3.select("#parrallelCoords")
             .append("svg")

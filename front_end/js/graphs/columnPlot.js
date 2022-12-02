@@ -229,7 +229,6 @@ export class ColumnPlot extends Graph {
 
     getXBoundsByGropedMovies(genreGrouped, selectedField) {
         let values;
-        console.log("H", genreGrouped)
         if (selectedField == "vote_count" && genreGrouped.some(e => e.rangeElement != undefined)) {
             values = genreGrouped.map(e => e.rangeElement).reduce((prev, curr) => {
                 if (curr) {
