@@ -1,5 +1,14 @@
 \documentclass[]{article}
-
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,      
+	urlcolor=cyan,
+	pdftitle={Overleaf Example},
+	pdfpagemode=FullScreen,
+}
+\newcommand{\quotes}[1]{``#1''}
 %opening
 \title{Movies Visual Analysis}
 \author{Luca Giovannesi}
@@ -9,8 +18,56 @@
 \maketitle
 
 \section{Introduction}
+IMDB is a website in which all moves data are collected, but, there isn't a built-in visual tool to analyzed these data, to analyze the data we have to open multiple pages and comparing data in a manual way.\newline
+The main use cases for this software could be:
+\begin{itemize}
+	\item To discover new movies based by some criteria
+	\item To discover new movies or similar to movies that you had already seen and you had like.
+	\item To find trends, insights and curiosities on a large dataset of movies
+ 
+	
+\end{itemize}
 \section{Related work}
 \section{Dataset}
+\subsection{The used dataset}
+The used dataset is the one called \quotes{\href{https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset}{The Movies Dataset}} available on Kaggle, this dataset contains about 5000 movies from the 1917 until 2017.\newline
+The dataset is composed by 7 csv files, but we use only 3 of them:
+\begin{itemize}
+	\item \textbf{\quotes{movie\_metadata.csv}}: This file has 24 columns and it contains the main information of the movies.
+	\item \textbf{\quotes{keywords.csv}}: This file includes the keywords of each movies.
+	\item \textbf{\quotes{credits.csv}}: This file contains information about the people who worked on the movies. 
+\end{itemize}
+\subsection{Dataset processing}
+The dataset needs a data elaboration to create a new dataset customized for our tool, in this way we avoid to perform heavy computation in \quotes{realtime} in the visualization tool and we drop the useless data in order to have a small dataset with a quicker loading time.\newline
+This pre-processing phase is made by a python script and it is composed by 2 main phases:
+\begin{enumerate}
+	\item In this phase we merge all the data from the different files and we drop the movies which contains invalid data, like empty fields or invalid formats.
+	\item This step computes the needed information for the multidimensional reduction, it is subdivided in 2 sub-phases:
+	\begin{enumerate}
+		\item \textbf{Build of similarity matrix}\newline
+		In the dataset each keyword is also represented with an unique integer identification number, so each movies has a vector of integers to represented the associated keywords, We have build a similarity matrix in which each cell $ij$ is filled with the similarity between the keywords of the movies $i$ and $j$
+		\item \textbf{MultiDimensional Scaling positions}\newline
+		Starting from the similarity matrix we compute the position of each movie in the multidimensional scaling plot.
+	\end{enumerate}
+\end{enumerate}
+After the previous elaboration we have for each movie these fields:
+\begin{itemize}
+	\item \textbf{id} An integer used to identify the movies.
+	\item \textbf{Title} The original title of the movies.
+	\item \textbf{Genres} The genres of the movies.
+	\item \textbf{Release year} The release year of the movies.
+	\item \textbf{Runtime} The runtime in minutes.
+	\item \textbf{Spoken languages} The spoken languages of the movies.
+	\item \textbf{Vote avg} The average of the votes.
+	\item \textbf{Vote count} The amount of the votes.
+	\item \textbf{Revenue} The revenue in dollars.
+	\item \textbf{Popularity} A popularity decimal value assigned by IMDB.
+	\item \textbf{Budget} The budget in dollars.
+	\item \textbf{Keywords}	The keywords of each movies, they are not directly used by the tool, but they can be useful to understand if the MDS works well.
+	\item \textbf{MDS position} The coordinates of each movie in the MDS plot.
+	\item \textbf{Director} The movie's director.
+\end{itemize}
+So we have 14 fields and 4943 movies, this makes the AS index equal to $69202$ definitely bigger than the suggested one, so we have created also the option to filter the dataset taking only the top 1000 movies by popularity, with this smaller dataset we have an AS index of $1400$.\newline
 \section{Visualization Techniques}
 Describe UI components
 \section{Insights}
