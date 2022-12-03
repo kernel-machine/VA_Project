@@ -33,15 +33,4 @@ jobs:
           build_dir: ./front_end
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Github Action for LaTeX
-        uses: xu-cheng/latex-action@v2
-        with:
-          root_file: ./report/report.tex
-      - name: Upload PDF file
-        uses: actions/upload-artifact@v3
-        with:
-          name: PDF
-          path: report.pdf
-
 
