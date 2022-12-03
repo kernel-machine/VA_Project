@@ -2,6 +2,10 @@
     display: flex;
 }
 
+body {
+    background-color: #e7eeff;
+}
+
 #loadingDiv {
     padding-top: 5%;
     width: 100%;
