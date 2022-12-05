@@ -4,7 +4,7 @@ import {
     hideMovieInfo,
     invertedColor,
     range,
-    showMovieInfo, showPopupInfo,
+    showMovieInfo, showPopupInfo, tickValuesFormatter,
     tickValuesFormatterSimple
 } from "../common/utils.js";
 import {Group} from "../common/Group.js";
@@ -371,7 +371,17 @@ class BubblePlot extends Graph {
                 .on('mouseover', e => {
                     const group = e.target.id.replace("dotGroup", "")
                     const selectedGroup = groups.find(e => e.getIntervalString(false) === group)
-                    const title = this.niceNames[groupSelectedField] + " from " + selectedGroup.intervalBegin + " to " + selectedGroup.intervalEnd
+                    let title = this.niceNames[groupSelectedField] + " from ";
+                    if (groupSelectedField === "release_year")
+                        title += selectedGroup.intervalBegin
+                    else
+                        title += tickValuesFormatterSimple(selectedGroup.intervalBegin)
+                    title += this.measureUnits[groupSelectedField].replace(/[{()}]/g, '') + " to "
+                    if (groupSelectedField === "release_year")
+                        title += selectedGroup.intervalEnd
+                    else
+                        title += tickValuesFormatterSimple(selectedGroup.intervalEnd)
+                    title += this.measureUnits[groupSelectedField].replace(/[{()}]/g, '')
                     const description = "Number of elements " + selectedGroup.getElementCount()
                     showPopupInfo(title, description, e.pageX, e.pageY)
                 })
