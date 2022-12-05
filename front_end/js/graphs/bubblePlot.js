@@ -322,9 +322,26 @@ class BubblePlot extends Graph {
                 .domain(groups.map(x => x.getElementCount()))
                 .range(output)
 
-            const colorScale = d3.scaleSequential()
-                .domain(d3.extent(range(0, groups.length)))
-                .interpolator(filtered_elements.length > 0 ? d3.interpolateReds : d3.interpolateGnBu);
+            let colorScale
+            if (filtered_elements.length > 0) {
+                colorScale = d3.scaleSequential()
+                    .domain(d3.extent(range(0, groups.length)))
+                    .interpolator(d3.interpolateReds)
+            }
+            else {
+                colorScale = d3.scaleQuantize()
+                    .domain(d3.extent(range(0, groups.length)))
+                    .range(["#7f3b08",
+                        "#b35806",
+                        "#e08214",
+                        "#fdb863",
+                        "#fee0b6",
+                        "#d8daeb",
+                        "#b2abd2",
+                        "#8073ac",
+                        "#542788",
+                        "#2d004b"])
+            }
 
             // Add dots
             this.svg.append('g')
