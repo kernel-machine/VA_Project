@@ -360,7 +360,7 @@ class BubblePlot extends Graph {
             const grouped = groupBy(a, e => e.radius)
 
             //Draw circles
-            let yOffset = 20
+            let yOffset = 30
             const largerRadius = d3.max(Array.from(grouped.keys()))
             grouped.forEach((val, key) => {
                 const radius = key
@@ -379,6 +379,22 @@ class BubblePlot extends Graph {
                     .attr("y", yOffset + radius + 15)
                 yOffset += 2 * radius + 20
             })
+
+            this.svg.append("text")
+                .attr("class", "bubbleLegend")
+                .text("#items")
+                .attr("text-anchor", "middle")
+                .style("fill", "black")
+                .attr("x", this.width + largerRadius + 15)
+                .attr("y", -8)
+
+            this.svg.append("text")
+                .attr("class", "bubbleLegend")
+                .text("Field range")
+                .attr("text-anchor", "middle")
+                .style("fill", "black")
+                .attr("x", this.width + largerRadius + 100)
+                .attr("y", -8)
 
             //Draw colors
             const height = this.height / 10
