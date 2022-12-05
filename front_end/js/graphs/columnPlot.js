@@ -86,10 +86,12 @@ export class ColumnPlot extends Graph {
 
         this.keys = this.makeUI()
         const xSelect = d3.select("#columnXSelect")
+        const ySelect = d3.select("#columnYSelect")
         const onSelectChange = () => {
             this.updateGraph(this.movies)
         }
         xSelect.on('change', onSelectChange)
+        ySelect.on('change', onSelectChange)
 
         this.updateGraph(this.movies)
     }
@@ -127,7 +129,6 @@ export class ColumnPlot extends Graph {
         d3.selectAll(".brush_column").remove()
         //Draw new brush area
         this.drawBrush()
-
     }
 
     /*
@@ -252,58 +253,23 @@ export class ColumnPlot extends Graph {
                     let label = this.groupedMovies?.result[i]?.textElement
                     if (!label)
                         label = tickValuesFormatterSimple(d)
-                if (label && xSelectedField != "vote_avg") {
-                    const length = label.length * 7
-                    const offset = length / 2
-                    spaceTaken = Math.max(offset, spaceTaken)
-                    return "rotate(30),translate(" + offset + ",-2)"
-                }
-                else
-                    return "rotate(0),translate(0,0)"
+                    if (label && xSelectedField != "vote_avg") {
+                        const length = label.length * 7
+                        const offset = length / 2
+                        spaceTaken = Math.max(offset, spaceTaken)
+                        return "rotate(30),translate(" + offset + ",-2)"
+                    }
+                    else
+                        return "rotate(0),translate(0,0)"
                 }
             )
 
-        this
-            .xAxis
-            .append(
-                "text"
-            )
-            .text(
-                this
-                    .niceNames
-                    [xSelectedField]
-                +
-                " "
-                +
-                this
-                    .measureUnits
-                    [xSelectedField]
-            )
-            .style(
-                "fill"
-                ,
-                "black"
-            )
-            .attr(
-                "transform"
-                ,
-                "rotate(0)"
-            )
-            .attr(
-                "y"
-                ,
-                30
-                +
-                spaceTaken
-            )
-            .attr(
-                "x"
-                ,
-                this
-                    .width
-                /
-                2
-            )
+        this.xAxis.append("text")
+            .text(this.niceNames [xSelectedField] + " " + this.measureUnits[xSelectedField])
+            .style("fill", "black")
+            .attr("transform", "rotate(0)")
+            .attr("y", 30 + spaceTaken)
+            .attr("x", this.width / 2)
     }
 
     updateGraph(movies) {
@@ -324,6 +290,28 @@ export class ColumnPlot extends Graph {
             bounds[1] += 0.5
             bounds[0] -= 0.5
         }
+
+        const isProportional = document.getElementById("columnYSelect").value == 1
+        if (isProportional) {
+            //Normalize
+            this.groupedMovies.result = this.groupedMovies.result.map(e => {
+                const ratio = maxValue / e.sum
+                e.sum = 0
+                this.genres.map(x => x.name).forEach(genre => {
+                    e[genre] *= ratio
+                    e.sum += e[genre]
+                })
+                return e
+            }).map(e => {
+                e.sum = 0
+                this.genres.map(x => x.name).forEach(genre => {
+                    e[genre] = (e[genre] / maxValue) * 100
+                    e.sum += e[genre]
+                })
+                return e
+            })
+        }
+
 
         this.xScaleLinear = d3.scaleLinear()
             .domain(bounds)
@@ -356,13 +344,14 @@ export class ColumnPlot extends Graph {
         }
 
         this.yAxisLinear = d3.scaleLinear()
-            .domain([0, maxValue])
+            .domain([0, isProportional ? 100 : maxValue])
             .range([this.height, 0])
 
         this.yAxis = this.svg.append("g")
             .attr("class", "columnAxis")
             .call(d3.axisLeft(this.yAxisLinear).tickFormat(d => {
-                    if (d > 1000) return Math.floor(d / 1000) + "k"
+                if (d > 1000) return Math.floor(d / 1000) + "k"
+                if (isProportional) d = d + "%"
                     return d
                 }
             ))
@@ -370,7 +359,7 @@ export class ColumnPlot extends Graph {
         this.updateAxisLabels(xSelectedField)
 
         this.yAxis.append("text")
-            .text("Amount")
+            .text(isProportional ? "Percentage" : "Amount")
             .text("Amount")
             .style("fill", "black")
             .attr("transform", "rotate(90)")
