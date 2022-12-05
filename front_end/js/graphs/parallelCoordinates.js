@@ -224,6 +224,7 @@ class ParallelCoordinates extends Graph {
             .find((d) => {
                 return e.target === this.yDomain[d].brush;
             });
+
         let selectedElements = []
         if (selectedX === "genres") {
             const selectedElement = this.genres.filter(g => {
@@ -253,7 +254,6 @@ class ParallelCoordinates extends Graph {
                 selection: [lowerBound, upperBound]
             }
         }
-
         this.filtered_data.forEach(movie => {
             this.dimensions
                 .filter(dim => selectedElements[dim] !== undefined)
@@ -282,6 +282,10 @@ class ParallelCoordinates extends Graph {
                 })
         })
 
+        this.applySelection()
+    }
+
+    applySelection() {
         const notEmptyBins = this.dimensions.filter(d => this.selectedIdsBins[d].size > 0).map(d => this.selectedIdsBins[d])
         if (notEmptyBins.length === 0)
             return
@@ -289,6 +293,22 @@ class ParallelCoordinates extends Graph {
         this.selectElements(this.selectedMovies)
     }
 
+    deselectAxis(event) {
+        //Remove area in one axis
+        let axis =
+            this.xScalePoint.domain()
+                .find((d) => event.target === this.yDomain[d].brush)
+        this.selectedIdsBins[axis].clear()
+        this.applySelection()
+    }
+
+    isSelectedBinsEmpty() {
+        for (let e in this.selectedIdsBins) {
+            if (this.selectedIdsBins[e].size > 0)
+                return false
+        }
+        return true
+    }
 
     //Create te selectable area for each axis
     createSelectableArea() {
@@ -307,7 +327,10 @@ class ParallelCoordinates extends Graph {
                         .on("brush", (e) => this.brushStart(e))
                         .on("end", (e) => {
                             if (e.selection == null) {
-                                this.clearSelection()
+                                this.deselectAxis(e)
+                                if (this.isSelectedBinsEmpty()) {
+                                    this.clearSelection()
+                                }
                             }
                         })
             )
