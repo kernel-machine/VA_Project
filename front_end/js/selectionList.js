@@ -7,8 +7,14 @@ export class SelectionList {
         listDiv.style("height", parentDiv.height * 0.85 + "px")
     }
 
+    movieComparator(a, b) {
+        if (a.title < b.title) return -1
+        if (a.title > b.title) return 1
+        else return 0
+    }
+
     addMovies(list) {
-        const nameList = this.movies.filter(x => list.includes(x.id)).map(x => {
+        const nameList = this.movies.filter(x => list.includes(x.id)).sort(this.movieComparator).map(x => {
             //console.log(x.title, x.id, x.keywords.map(x => x.name))
             return "<b>" + x.title + "</b> | " + x.director// + " " + x.id
         })
