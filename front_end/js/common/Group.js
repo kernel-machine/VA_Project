@@ -1,18 +1,18 @@
 import {tickValuesFormatter} from "./utils.js";
 
 export class Group {
-    #intervalBegin = 0
-    #intervalEnd = 0
+    intervalBegin = 0
+    intervalEnd = 0
     #elements = []
 
     constructor(intervalBegin, intervalEnd, elements) {
-        this.#intervalBegin = intervalBegin
-        this.#intervalEnd = intervalEnd
+        this.intervalBegin = intervalBegin
+        this.intervalEnd = intervalEnd
         this.#elements = elements
     }
 
     getAvgValue() {
-        return (this.#intervalEnd - this.#intervalBegin) / 2
+        return (this.intervalEnd - this.intervalBegin) / 2
     }
 
     getAvgField(fieldName) {
@@ -25,8 +25,8 @@ export class Group {
 
     getIntervalString(formatting = false) {
         if (formatting)
-            return tickValuesFormatter(this.#intervalBegin, 1) + "-" + tickValuesFormatter(this.#intervalEnd, 1)
+            return tickValuesFormatter(this.intervalBegin, 1) + "-" + tickValuesFormatter(this.intervalEnd, 1)
         else
-            return this.#intervalBegin + "-" + this.#intervalEnd
+            return this.intervalBegin + "-" + this.intervalEnd
     }
 }

@@ -4,7 +4,7 @@ import {
     hideMovieInfo,
     invertedColor,
     range,
-    showMovieInfo,
+    showMovieInfo, showPopupInfo,
     tickValuesFormatterSimple
 } from "../common/utils.js";
 import {Group} from "../common/Group.js";
@@ -283,6 +283,7 @@ class BubblePlot extends Graph {
                     .style("fill", defaultColor)
                     .attr("class", "bubbleDot")
                     .on('mouseover', e => {
+                        console.log(e)
                         const filmId = e.target.id.replace("dot", "")
                         this.hoverAnElement(filmId)
                         const movie = this.movies.find(x => x.id == filmId)
@@ -356,7 +357,7 @@ class BubblePlot extends Graph {
                     return this.yScaleLinear(d.getAvgField(ySelectedField))
                 })
                 .attr("id", (d) => {
-                    return "dotGroup" + d.getIntervalString(true)
+                    return "dotGroup" + d.getIntervalString(false)
                 })
                 .attr("r", (d) => {
                     return radiusScale(d.getElementCount());
@@ -366,6 +367,16 @@ class BubblePlot extends Graph {
                 .style("fill", (d) => {
                     const color = d3.color(colorScale(groups.indexOf(d)))
                     return color.formatHex()
+                })
+                .on('mouseover', e => {
+                    const group = e.target.id.replace("dotGroup", "")
+                    const selectedGroup = groups.find(e => e.getIntervalString(false) === group)
+                    const title = this.niceNames[groupSelectedField] + " from " + selectedGroup.intervalBegin + " to " + selectedGroup.intervalEnd
+                    const description = "Number of elements " + selectedGroup.getElementCount()
+                    showPopupInfo(title, description, e.pageX, e.pageY)
+                })
+                .on('mouseleave', e => {
+                    hideMovieInfo()
                 })
 
             const a = groups.map(x => {
