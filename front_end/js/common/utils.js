@@ -26,8 +26,14 @@ export function tickValuesFormatterSimple(value) {
 }
 
 export function showMovieInfo(movie, x, y) {
-    d3.select("#title").html(movie.title)
-    d3.select("#director").html(movie.release_year + " | " + movie.director)
+    const title = movie.title
+    const description = movie.release_year + " | " + movie.director
+    showPopupInfo(title, description, x, y)
+}
+
+export function showPopupInfo(title, description, x, y) {
+    d3.select("#title").html(title)
+    d3.select("#director").html(description)
     d3.select("#infoBox")
         .style("top", y + 3 + "px")
         .style("left", x + 3 + "px")

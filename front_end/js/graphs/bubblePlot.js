@@ -4,7 +4,7 @@ import {
     hideMovieInfo,
     invertedColor,
     range,
-    showMovieInfo,
+    showMovieInfo, showPopupInfo,
     tickValuesFormatterSimple
 } from "../common/utils.js";
 import {Group} from "../common/Group.js";
@@ -283,6 +283,7 @@ class BubblePlot extends Graph {
                     .style("fill", defaultColor)
                     .attr("class", "bubbleDot")
                     .on('mouseover', e => {
+                        console.log(e)
                         const filmId = e.target.id.replace("dot", "")
                         this.hoverAnElement(filmId)
                         const movie = this.movies.find(x => x.id == filmId)
@@ -322,9 +323,26 @@ class BubblePlot extends Graph {
                 .domain(groups.map(x => x.getElementCount()))
                 .range(output)
 
-            const colorScale = d3.scaleSequential()
-                .domain(d3.extent(range(0, groups.length)))
-                .interpolator(filtered_elements.length > 0 ? d3.interpolateReds : d3.interpolateGnBu);
+            let colorScale
+            if (filtered_elements.length > 0) {
+                colorScale = d3.scaleSequential()
+                    .domain(d3.extent(range(0, groups.length)))
+                    .interpolator(d3.interpolateReds)
+            }
+            else {
+                colorScale = d3.scaleQuantize()
+                    .domain(d3.extent(range(0, groups.length)))
+                    .range(["#7f3b08",
+                        "#b35806",
+                        "#e08214",
+                        "#fdb863",
+                        "#fee0b6",
+                        "#d8daeb",
+                        "#b2abd2",
+                        "#8073ac",
+                        "#542788",
+                        "#2d004b"])
+            }
 
             // Add dots
             this.svg.append('g')
@@ -339,7 +357,7 @@ class BubblePlot extends Graph {
                     return this.yScaleLinear(d.getAvgField(ySelectedField))
                 })
                 .attr("id", (d) => {
-                    return "dotGroup" + d.getIntervalString(true)
+                    return "dotGroup" + d.getIntervalString(false)
                 })
                 .attr("r", (d) => {
                     return radiusScale(d.getElementCount());
@@ -349,6 +367,16 @@ class BubblePlot extends Graph {
                 .style("fill", (d) => {
                     const color = d3.color(colorScale(groups.indexOf(d)))
                     return color.formatHex()
+                })
+                .on('mouseover', e => {
+                    const group = e.target.id.replace("dotGroup", "")
+                    const selectedGroup = groups.find(e => e.getIntervalString(false) === group)
+                    const title = this.niceNames[groupSelectedField] + " from " + selectedGroup.intervalBegin + " to " + selectedGroup.intervalEnd
+                    const description = "Number of elements " + selectedGroup.getElementCount()
+                    showPopupInfo(title, description, e.pageX, e.pageY)
+                })
+                .on('mouseleave', e => {
+                    hideMovieInfo()
                 })
 
             const a = groups.map(x => {
@@ -360,7 +388,7 @@ class BubblePlot extends Graph {
             const grouped = groupBy(a, e => e.radius)
 
             //Draw circles
-            let yOffset = 20
+            let yOffset = 30
             const largerRadius = d3.max(Array.from(grouped.keys()))
             grouped.forEach((val, key) => {
                 const radius = key
@@ -379,6 +407,22 @@ class BubblePlot extends Graph {
                     .attr("y", yOffset + radius + 15)
                 yOffset += 2 * radius + 20
             })
+
+            this.svg.append("text")
+                .attr("class", "bubbleLegend")
+                .text("#items")
+                .attr("text-anchor", "middle")
+                .style("fill", "black")
+                .attr("x", this.width + largerRadius + 15)
+                .attr("y", -8)
+
+            this.svg.append("text")
+                .attr("class", "bubbleLegend")
+                .text("Field range")
+                .attr("text-anchor", "middle")
+                .style("fill", "black")
+                .attr("x", this.width + largerRadius + 100)
+                .attr("y", -8)
 
             //Draw colors
             const height = this.height / 10

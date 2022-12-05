@@ -89,10 +89,27 @@ The described computations are not done in real time by the webpage, because the
 \subsubsection{Visualization tool}
 In graph we have a set of dots, each dots represents a movie, the user can hover the mouse on a dot to see addition information (Movie title, Director and release year) and to highlight the movie on the other plots.\newline
 The visualization tool has two modes: the zoom mode and the select mode, with the zoom mode the user can zoom and move the visualized area of the graph, while in select mode the user can select an area drawing a rectangle.
-
-
 \subsection{Parallel coordinates}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\linewidth]{images/parallel_plot}
+	\caption{Parallel coordinates plot}
+	\label{fig:parallelplot}
+\end{figure}
+Parallel coordinates is a technique uses to visualize multidimensional data through parallel axes in a 2D chart. In out case each axis represent an attribute of the movie.\newline
+The visualized attributes are: genres, release year, average rate, number of rates, runtime and the spoken languages, genres and languages are discrete values, while the other attributes are linear values.\newline
+The user can highlight a movie or makes a selection brushing a range selection on the axes.
 \subsection{Bubble plot}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\linewidth]{images/bubble_plot}
+	\caption[Bubble plot]{}
+	\label{fig:bubbleplot}
+\end{figure}
+In the bubble plot we can visualize every continuous attribute present in the dataset, the user can select the attribute for the axes X and Y, and he can also aggregate by a specific field, when the aggregation is enabled each bubble has a specific radius and color, the radius indicates the amount of elements inside the bubble, and the color the range of the selected field inside the bubble.
+For example in the plot shown in the figure \ref{fig:bubbleplot} each bubble has the center in a point when the X position indicates the number of rates and the Y position the average rate, the elements are grouped by the budget, the radius indicates the amount of elements and the color indicates for example that the budget of the movies inside a specific bubble is between the two indicated values.\newline
+The chosen colors are picked using \href{https://colorbrewer2.or}{ColorBrew2} and they are colorblind safe.\newline
+In this graph is also possible to visualize only the movies of a specific year using the bottom slider, it is also possible to automatically go forward with the years clicking to the button \quotes{play}.
 \subsection{Column plot}
 \subsection{Selection list}
 \subsection{Interaction}
