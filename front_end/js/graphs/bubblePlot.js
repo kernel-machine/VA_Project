@@ -283,7 +283,6 @@ class BubblePlot extends Graph {
                     .style("fill", defaultColor)
                     .attr("class", "bubbleDot")
                     .on('mouseover', e => {
-                        console.log(e)
                         const filmId = e.target.id.replace("dot", "")
                         this.hoverAnElement(filmId)
                         const movie = this.movies.find(x => x.id == filmId)
