@@ -270,7 +270,7 @@ class BubblePlot extends Graph {
             this.svg.selectAll(".bubbleDot").remove()
             this.svg.selectAll(".bubbleLegend").remove()
             const groupsNumber = 10
-            const extent = d3.extent(this.movies.map(movie => movie[groupSelectedField]))
+            const extent = d3.extent(filteredData.map(movie => movie[groupSelectedField]))
             const startValue = extent[0]
             const endValue = extent[1]
             const stepAmount = (endValue - startValue) / groupsNumber

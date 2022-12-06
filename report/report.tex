@@ -28,6 +28,7 @@ The main use cases for this software could be:
 	\item To find trends, insights and curiosities on a large dataset of movies
 \end{itemize}
 \section{Related work}
+https://asistdl.onlinelibrary.wiley.com/doi/full/10.1002/asi.23213
 \section{Dataset}
 \subsection{The used dataset}
 The used dataset is the one called \quotes{\href{https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset}{The Movies Dataset}} available on Kaggle, this dataset contains about 5000 movies from the 1917 until 2017.\newline
@@ -39,9 +40,11 @@ The dataset is composed by 7 csv files, but we use only 3 of them:
 \end{itemize}
 \subsection{Dataset processing}
 The dataset needs a data elaboration to create a new dataset customized for our tool, in this way we avoid to perform heavy computation in \quotes{realtime} in the visualization tool and we drop the useless data in order to have a small dataset with a quicker loading time.\newline
+Furthermore we take in consideration also the inflation, 1\$ of 1930s is not equivalent to 1\$ of nowadays, applying some calculation in this phase.\newline
 This pre-processing phase is made by a python script and it is composed by 2 main phases:
 \begin{enumerate}
 	\item In this phase we merge all the data from the different files and we drop the movies which contains invalid data, like empty fields or invalid formats.
+	\item The budget and revenue of each movie are computed also considering the inflation.
 	\item This step computes the needed information for the multidimensional reduction, it is subdivided in 2 sub-phases:
 	\begin{enumerate}
 		\item \textbf{Build of similarity matrix}\newline
@@ -61,8 +64,10 @@ After the previous elaboration we have for each movie these fields:
 	\item \textbf{Vote avg} The average of the votes.
 	\item \textbf{Vote count} The amount of the votes.
 	\item \textbf{Revenue} The revenue in dollars.
+	\item \textbf{Revenue (Inf.)} The revenue considering the inflation.
 	\item \textbf{Popularity} A popularity decimal value assigned by IMDB.
 	\item \textbf{Budget} The budget in dollars.
+	\item \textbf{Budget (Inf.)} The budget in dollars considering the inflation.
 	\item \textbf{Keywords}	The keywords of each movies, they are not directly used by the tool, but they can be useful to understand if the MDS works well.
 	\item \textbf{MDS position} The coordinates of each movie in the MDS plot.
 	\item \textbf{Director} The movie's director.
@@ -116,9 +121,10 @@ In this graph is also possible to visualize only the movies of a specific year u
 	\caption[Column plot]{}
 	\label{fig:columnplot}
 \end{figure}
-A column plot is build with a series of parallel columns to the axis X, the height of each column represents the value of the Y axis, in our case the amount of elements.\newline
+A column plot is build with a series of parallel columns to the axis X, the height of each column represents the value of the Y axis, in our case the amount of elements or the percentage ratio.\newline
 Each column contains multiple segments of different colors, each color represents the genre of a movie and if for example a movie genre is both action and adventure, the movie will be counted twice.\newline
-It is possible to choose different fields for the X axis, the user can choose between: release year, runtime, average rate, number of rates, revenue, popularity and budget. There are some fields in which all the possible values can be displayed, for example the years like in figure \ref{fig:columnplot}, while there are other fields that are impossible to represents all the value, for example the budget, so the column represent an aggregated value, for instance the first column represents the movies with a budget between 1 millions and 19M, the second from 19M and 38M and so on. The user can apply a zoom on a specific area drawing a rectangle with the mouse, when the user zoom on an area composed by aggregated value, if there is enough space, the graph disable the aggregation and show the value singularly, otherwise the aggregation is still present.
+It is possible to choose different fields for the X axis, the user can choose between: release year, runtime, average rate, number of rates, revenue, popularity and budget, while for the Y axis the user can choose between the amount of movies present in the X field or how the different genre are divided in percentage, for example in figure \ref{fig:columnplot} we have the amount of movie release for each year divided by genre, but for example in the last years the amount of release movies is much larger than the ones released in 60', so can be useful to visualized the percentage of each genre during the years, this can be done selecting percentage on the Y axis, we will see this application in the insights.\newline
+There are some fields in which all the possible values can be displayed, for example the years like in figure \ref{fig:columnplot}, while there are other fields that are impossible to represents all the value, for example the budget, so the column represent an aggregated value, for instance the first column represents the movies with a budget between 1 millions and 19M, the second from 19M and 38M and so on. The user can apply a zoom on a specific area drawing a rectangle with the mouse, when the user zoom on an area composed by aggregated value, if there is enough space, the graph disable the aggregation and show the value singularly, otherwise the aggregation is still present.
 \subsection{Selection list}
 \begin{figure}[H]
 	\centering
@@ -140,5 +146,34 @@ Each interaction on a graph triggers some events also in the other graphs, the i
 	\item \textbf{Selection:} When the user select some elements on a graph, the selected elements are highlighted also on the other graphs. If the user makes a selection on multiple graph, the highlighted elements are the common movies between the selection of the graphs.
 \end{itemize}
 \section{Insights}
+\subsection{The decline of western movies}
+The western genre had the maximum popularity between the the 1940s and 1970s, as mentioned in the article \href{https://screenculturejournal.com/2017/04/the-decline-in-popularity-of-the-western-film-genre/}{\quotes{The Decline in Popularity of the Western Film Genre}} \quotes{\emph{[...] For a long time, the Western was one of the dominant genres in the American film industry. After getting off to a good start in the silent film era, it declined throughout the 1920s and 30s before experiencing a resurgence in the 1940s. At that point, it became extremely popular in the United States and helped create such iconic stars as John Wayne and Clint Eastwood. However, beginning in the 1970s, audience appetite for the genre began to wane.[...]}}.
+We expect to see a first decline between 1920s and 30s and an increase of popularity between 1940s and 70s.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{images/insights_western}
+	\caption[Western movies trend]{Analyis of the western movies among the years}
+	\label{fig:insightswestern}
+\end{figure}
+In the instance presented in figure \ref{fig:insightswestern} we have on the column plot as X axis the release year, in the Y axis the amount in percentage and we have filtered only the western movies. Unfortunally we can see the first decline between 1920s and 30s because these movies are not in the dataset, but, we can see the increase of popularity between 1945 until the 1975s, we can see also that starting from the 1980s the percentage of western movies is very small compared to the other genres, so we can see clearly the decline.\newline
+Using the parallel coordinates graph we have selected only the western movies, and setting the bubble plot with X for release year, revenue considering the inflation for Y and group the movies by the release year, we can make two observations in the bubble plot: the amount of movies are smaller as the years increase (the dots get always smaller and smaller as you go to the right), this confirm the trend of the column plot, and we can see how the western movies released between 60s and 70s have an higher revenue than the ones in 2000s, probably at that time the people were more interested to watch them.
+\subsubsection{A larger budget makes a better movie?}
+Spend a lot of money to produce a movie, ensure us to produce a better movie?
+\subsubsection{Movie suggestions}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{images/insights_suggestion1}
+	\caption{An instance in which the user search new movie based on the ones that he has already seen}
+	\label{fig:insightssuggestion}
+\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{images/insights_suggestion2}
+	\caption{The user has selected the area find in figure \ref{fig:insightssuggestion} to have the list of movie on the right-bottom area}
+	\label{fig:insightssuggestion2}
+\end{figure}
+
+
+
 \section{Conclusion}
 \end{document}
