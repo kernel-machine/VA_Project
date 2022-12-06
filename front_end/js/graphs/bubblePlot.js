@@ -20,11 +20,11 @@ class BubblePlot extends Graph {
         'vote_avg': "Average rate",
         'vote_count': "Number of rates",
         'revenue': "Revenue",
-        'revenue_inflated': "Revenue inflated",
+        'revenue_inflated': "Revenue (Inf.)",
         "runtime": "Runtime",
         "release_year": "Release year",
         'budget': "Budget",
-        'budget_inflated': "Budget inflated"
+        'budget_inflated': "Budget (Inf.)"
     }
 
     measureUnits = {
