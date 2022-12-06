@@ -337,6 +337,11 @@ class ParallelCoordinates extends Graph {
         })
     }
 
+    hoverAnElement(filmId, send_event = true) {
+        super.hoverAnElement(filmId, send_event);
+        this.raiseAxis()
+    }
+
 
 }
 
