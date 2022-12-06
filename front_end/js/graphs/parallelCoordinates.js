@@ -323,7 +323,7 @@ class ParallelCoordinates extends Graph {
             d3.select("#brush" + d).call(
                 this.yDomain[d].brush =
                     d3.brushY()
-                        .extent([[-10, 0], [10, this.height]])
+                        .extent([[-10, -5], [10, this.height + 5]])
                         .on("brush", (e) => this.brushStart(e))
                         .on("end", (e) => {
                             if (e.selection == null) {

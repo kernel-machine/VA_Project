@@ -28,6 +28,8 @@ export class ColumnPlot extends Graph {
         'budget': "($)"
     }
 
+    selectedGenre = undefined
+
     constructor(movies) {
         super("Column plot");
         this.movies = movies.map(x => {
@@ -350,8 +352,8 @@ export class ColumnPlot extends Graph {
         this.yAxis = this.svg.append("g")
             .attr("class", "columnAxis")
             .call(d3.axisLeft(this.yAxisLinear).tickFormat(d => {
-                if (d > 1000) return Math.floor(d / 1000) + "k"
-                if (isProportional) d = d + "%"
+                    if (d > 1000) return Math.floor(d / 1000) + "k"
+                    if (isProportional) d = d + "%"
                     return d
                 }
             ))
@@ -366,7 +368,12 @@ export class ColumnPlot extends Graph {
             .attr("y", 40)
             .attr("x", this.height / 2)
 
-        let a = d3.stack().keys(this.genres.map(x => x.name))(this.groupedMovies.result)
+        let a;
+        if (this.selectedGenre == undefined)
+            a = d3.stack().keys(this.genres.map(x => x.name))(this.groupedMovies.result)
+        else
+            a = d3.stack().keys([this.selectedGenre])(this.groupedMovies.result)
+
         this.svg.selectAll(".bars").remove()
         const minDistance = this.groupedMovies.result.map(x => x.selElement).reduce((accumulator, currentValue, currentIndex, array) => {
             const nextIndex = currentIndex + 1;
@@ -431,13 +438,25 @@ export class ColumnPlot extends Graph {
         legend.data(this.genres.map(x => x.name))
             .enter()
             .append("text")
+            .attr("id", (d) => d)
             .attr("x", (d, i) => 5 + (i % 10) * spaceBetweenElements)
             .attr("y", (d, i) => 2.5 + (i < 10 ? 0 : 15)) // 100 is where the first dot appears. 25 is the distance between dots
             .style("fill", "black")
             .text(d => d)
+            .style("font-weight", (d) => d == this.selectedGenre ? "bold" : "initial")
+            .style("text-decoration", (d) => d == this.selectedGenre ? "underline" : "initial")
             .attr("text-anchor", "left")
             .style("alignment-baseline", "start")
             .attr("font-size", 9)
+            .on("click", e => {
+                const newId = e.target.id
+                if (this.selectedGenre == newId) {
+                    this.selectedGenre = undefined
+                }
+                else
+                    this.selectedGenre = e.target.id
+                this.updateGraph(this.movies)
+            })
     }
 
     makeUI() {
