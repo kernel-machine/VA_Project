@@ -9,23 +9,38 @@ from sklearn.manifold import MDS
 
 import numpy as np
 import pandas as pd
+import cpi
 
 from utils import jaccard_similarity
 from dataset_manager import DatasetManager
 
-
 ### Download  ###
 if __name__ == "__main__":
+    cpi.update()
     dm = DatasetManager()
     if dm.isDownloadNeeded():
         dm.downloadDataset()
-
 
 ### END DOWNLOAD ###
 
 movies_metadata = pd.read_csv("kaggle/movies_metadata.csv", low_memory=False)
 keywords_csv = pd.read_csv("kaggle/keywords.csv", low_memory=False, index_col="id")
 credit_csv = pd.read_csv("kaggle/credits.csv", low_memory=False, index_col="id")
+
+
+def validate_date(date_text):
+    try:
+        datetime.strptime(date_text, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+a = list(movies_metadata.release_date)
+a = list(filter(lambda x: isinstance(x, str) and validate_date(x), a))
+a = list(map(lambda x: datetime.strptime(x, "%Y-%m-%d").year, a))
+max_release_year = max(a)
+print("MAX YEAR:", max_release_year)
 
 
 def get_director_by_id(id):
@@ -62,8 +77,10 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             vote_average = float(movies_metadata.at[current_row, "vote_average"])
             vote_count = int(movies_metadata.at[current_row, "vote_count"])
             revenue = int(movies_metadata.at[current_row, "revenue"])
+            revenue_inflated = int(cpi.inflate(revenue, release_year, max_release_year))
             popularity = float(movies_metadata.at[current_row, "popularity"])
             budget = int(movies_metadata.at[current_row, "budget"])
+            budget_inflated = int(cpi.inflate(budget, release_year, max_release_year))
             overview = movies_metadata.at[current_row, "overview"]
             keywords = ast.literal_eval(get_keywords_by_id(movie_id))
             director = get_director_by_id(movie_id)
@@ -71,35 +88,34 @@ def process_chuck(thread_id, start_row, end_row, result, progress):
             pass  # print("Wrong format")
         else:
             if (
-                vote_average > 0
-                and vote_count > 0
-                and revenue > 0
-                and popularity > 0
-                and budget > 0
-                and not isnan(runtime)
-                and len(spoken_languages) > 0
-                and len(genres) > 0
-                and checkValidity(overview)
-                and keywords is not None
-                and len(keywords) > 0
+                    vote_average > 0
+                    and vote_count > 0
+                    and revenue > 0
+                    and popularity > 0
+                    and budget > 0
+                    and not isnan(runtime)
+                    and len(spoken_languages) > 0
+                    and len(genres) > 0
+                    and checkValidity(overview)
+                    and keywords is not None
+                    and len(keywords) > 0
             ):
                 result.append(
                     {
                         "id": movie_id,
-                        # "imdb_id": imdb_id,
                         "title": title,
                         "genres": genres,
-                        #"release_data": release_data,
                         "release_year": release_year,
                         "runtime": runtime,
                         "spoken_languages": spoken_languages,
                         "vote_avg": vote_average,
                         "vote_count": vote_count,
                         "revenue": revenue,
+                        "revenue_inflated": revenue_inflated,
                         "popularity": popularity,
                         "budget": budget,
+                        "budget_inflated": budget_inflated,
                         "keywords": keywords,
-                        #"overview": overview,
                         "director": director,
                     }
                 )

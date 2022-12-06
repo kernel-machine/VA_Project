@@ -13,9 +13,11 @@ export class ColumnPlot extends Graph {
         'vote_avg': "Average rate",
         'vote_count': "Number of rates",
         'revenue': "Revenue",
+        'revenue_inflated': "Revenue inflated",
         "runtime": "Runtime",
         "release_year": "Release year",
-        'budget': "Budget"
+        'budget': "Budget",
+        'budget_inflated': "Budget inflated"
     }
 
     measureUnits = {
@@ -23,9 +25,11 @@ export class ColumnPlot extends Graph {
         'vote_avg': "",
         'vote_count': "",
         'revenue': "($)",
+        'revenue_inflated': "($)",
         "runtime": "(Minutes)",
         "release_year": "",
-        'budget': "($)"
+        'budget': "($)",
+        'budget_inflated': "($)"
     }
 
     selectedGenre = undefined

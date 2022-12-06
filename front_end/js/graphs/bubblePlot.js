@@ -4,10 +4,12 @@ import {
     hideMovieInfo,
     invertedColor,
     range,
-    showMovieInfo, showPopupInfo, tickValuesFormatter,
+    showMovieInfo,
+    showPopupInfo,
     tickValuesFormatterSimple
 } from "../common/utils.js";
 import {Group} from "../common/Group.js";
+import {InflationCalculator} from "../common/InflationCalculator.js";
 
 const defaultColor = "#2c7bb6"
 
@@ -18,9 +20,11 @@ class BubblePlot extends Graph {
         'vote_avg': "Average rate",
         'vote_count': "Number of rates",
         'revenue': "Revenue",
+        'revenue_inflated': "Revenue inflated",
         "runtime": "Runtime",
         "release_year": "Release year",
-        'budget': "Budget"
+        'budget': "Budget",
+        'budget_inflated': "Budget inflated"
     }
 
     measureUnits = {
@@ -28,9 +32,11 @@ class BubblePlot extends Graph {
         'vote_avg': "",
         'vote_count': "",
         'revenue': "($)",
+        'revenue_inflated': "($)",
         "runtime": "(Minutes)",
         "release_year": "",
-        'budget': "($)"
+        'budget': "($)",
+        'budget_inflated': "($)"
     }
 
     constructor(movies) {
@@ -39,6 +45,7 @@ class BubblePlot extends Graph {
         this.keys = this.makeUI()
         this.selectedMovies = [];
         this.highlightedIds = []
+        this.inflactionTool = new InflationCalculator(2017)
 
         this.margin = {top: 20, right: 180, bottom: 40, left: 50}
 
@@ -100,7 +107,6 @@ class BubblePlot extends Graph {
             yearPlayButton.node().disabled = !e.target.checked
             yearRange.node().disabled = !e.target.checked
             this.updateGraph(false)
-
         })
         checkboxByYear.dispatch("change")
         this.updateGraph(false)
@@ -199,55 +205,20 @@ class BubblePlot extends Graph {
         d3.selectAll(".bubbleAxis")
             .remove()
 
-        this.xScaleLinear = d3.scaleLinear()
-            .domain(d3.extent(this.movies.map(movie => movie[xSelectedField])))
-            .range([0, this.width]);
-        let xAxis =
-            this.svg.append("g")
-                .attr("class", "bubbleAxis")
-                .attr("transform", "translate(0," + this.height + ")")
-        if (xSelectedField === "release_year")
-            xAxis.call(d3.axisBottom(this.xScaleLinear));
-        else
-            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(tickValuesFormatterSimple))
-
-
-        // Add Y axis
-        this.yScaleLinear = d3.scaleLinear()
-            .domain(d3.extent(this.movies.map(movie => movie[ySelectedField])))
-            .range([this.height, 0]);
-        let yAxis =
-            this.svg.append("g")
-                .attr("class", "bubbleAxis")
-        if (ySelectedField === "release_year")
-            yAxis.call(d3.axisLeft(this.yScaleLinear))
-        else
-            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatterSimple))
-
-
-        this.svg.selectAll(".labels").remove()
-        const yLabel = this.niceNames[ySelectedField] + " " + this.measureUnits[ySelectedField]
-        yAxis.append("text")
-            .attr("class", "labels")
-            .text(yLabel)
-            .style("fill", "black")
-            .attr("transform", "rotate(90)")
-            .attr("y", 47.5)
-            .attr("x", (this.height / 2) + (yLabel.length / 2) * 2.8)
-
-        const xLabel = this.niceNames[xSelectedField] + " " + this.measureUnits[xSelectedField]
-        xAxis.append("text")
-            .attr("class", "labels")
-            .text(xLabel)
-            .style("fill", "black")
-            .attr("y", 35)
-            .attr("x", this.width / 2)
-
         const yearRange = document.getElementById("yearRange")
         let filteredData = checkboxByYear.checked ?
             this.movies.filter(x => x.release_year == yearRange.value) : this.movies
 
-        if (groupSelectedField === undefined) {//Disabled
+        if (groupSelectedField === undefined) {//Group disabled
+            this.xScaleLinear = d3.scaleLinear()
+                .domain(d3.extent(filteredData.map(movie => movie[xSelectedField])))
+                .range([0, this.width]);
+
+            // Add Y axis
+            this.yScaleLinear = d3.scaleLinear()
+                .domain(d3.extent(filteredData.map(movie => movie[ySelectedField])))
+                .range([this.height, 0]);
+
             // Add dots
             const dots = this.svg.selectAll(".bubbleDot")
             const dotsAreGroup = dots.nodes().map(x => x.id).some(x => x.includes("dotGroup"))
@@ -316,6 +287,16 @@ class BubblePlot extends Graph {
                     groups.push(group)
                 }
             }
+
+            this.xScaleLinear = d3.scaleLinear()
+                .domain(d3.extent(groups.map(x => x.getAvgField(xSelectedField))))
+                .range([0, this.width]);
+
+            // Add Y axis
+            this.yScaleLinear = d3.scaleLinear()
+                .domain(d3.extent(groups.map(x => x.getAvgField(ySelectedField))))
+                .range([this.height, 0]);
+
 
             const output = [5, 10, 17.5, 25, 35]
             const radiusScale = d3.scaleQuantile()
@@ -459,6 +440,42 @@ class BubblePlot extends Graph {
                 .attr("x", this.width + 60 + largerRadius + 40)
                 .attr("y", (d) => groups.indexOf(d) * height + height / 2 + 4)
         }
+
+        let yAxis =
+            this.svg.append("g")
+                .attr("class", "bubbleAxis")
+        if (ySelectedField === "release_year")
+            yAxis.call(d3.axisLeft(this.yScaleLinear))
+        else
+            yAxis.call(d3.axisLeft(this.yScaleLinear).tickFormat(tickValuesFormatterSimple))
+
+
+        this.svg.selectAll(".labels").remove()
+        const yLabel = this.niceNames[ySelectedField] + " " + this.measureUnits[ySelectedField]
+        yAxis.append("text")
+            .attr("class", "labels")
+            .text(yLabel)
+            .style("fill", "black")
+            .attr("transform", "rotate(90)")
+            .attr("y", 47.5)
+            .attr("x", (this.height / 2) + (yLabel.length / 2) * 2.8)
+
+        let xAxis =
+            this.svg.append("g")
+                .attr("class", "bubbleAxis")
+                .attr("transform", "translate(0," + this.height + ")")
+        if (xSelectedField === "release_year")
+            xAxis.call(d3.axisBottom(this.xScaleLinear));
+        else
+            xAxis.call(d3.axisBottom(this.xScaleLinear).tickFormat(tickValuesFormatterSimple))
+
+        const xLabel = this.niceNames[xSelectedField] + " " + this.measureUnits[xSelectedField]
+        xAxis.append("text")
+            .attr("class", "labels")
+            .text(xLabel)
+            .style("fill", "black")
+            .attr("y", 35)
+            .attr("x", this.width / 2)
     }
 
     onBrush(e) {
