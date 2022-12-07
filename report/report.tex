@@ -14,6 +14,7 @@
 %opening
 \title{Movies Visual Analysis}
 \author{Luca Giovannesi}
+\date{}
 
 \begin{document}
 
@@ -28,7 +29,9 @@ The main use cases for this software could be:
 	\item To find trends, insights and curiosities on a large dataset of movies
 \end{itemize}
 \section{Related work}
-https://asistdl.onlinelibrary.wiley.com/doi/full/10.1002/asi.23213
+During the development of the project, we have thought of possible analysis cases in order to have a clear idea on what features are needed, so we have started to search for reports or facts about the movie industries.\newline
+The first idea in which the tool could be useful is to study the decline or the ascent of some genre and if possible to understand the reasons. We have focused on the western movies, since nowadays is very rare to have this genre at the cinema. There are a lot of article about this decline, we have focused on the article \quotes{\emph{\href{https://screenculturejournal.com/2017/04/the-decline-in-popularity-of-the-western-film-genre/}{The Decline in Popularity of the Western Film Genre}}} written by \emph{Ben Pivoz} in which the author analyze the decline of the western genre.\newline\newline
+One interesting analysis that could be performed in the movies industries, is if there is a correlation between the budget and the success of a movie, this was analyzed in the paper \href{https://asistdl.onlinelibrary.wiley.com/doi/full/10.1002/asi.23213}{\quotes{Correlations between user voting data, budget, and box office for films in the internet movie database}}, this paper other than trying to answer to this question, suggest to us also some features to implements, like taking in consideration the inflation, phenomenon completely ignored at the beginning of this project. Therefore the authors of this paper based their work on the IMDB dataset, the same dataset used in this project.
 \section{Dataset}
 \subsection{The used dataset}
 The used dataset is the one called \quotes{\href{https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset}{The Movies Dataset}} available on Kaggle, this dataset contains about 5000 movies from the 1917 until 2017.\newline
@@ -64,10 +67,10 @@ After the previous elaboration we have for each movie these fields:
 	\item \textbf{Vote avg} The average of the votes.
 	\item \textbf{Vote count} The amount of the votes.
 	\item \textbf{Revenue} The revenue in dollars.
-	\item \textbf{Revenue (Inf.)} The revenue considering the inflation.
+	\item \textbf{Revenue (Inf.)} The actual revenue considering the inflation.
 	\item \textbf{Popularity} A popularity decimal value assigned by IMDB.
 	\item \textbf{Budget} The budget in dollars.
-	\item \textbf{Budget (Inf.)} The budget in dollars considering the inflation.
+	\item \textbf{Budget (Inf.)} The actual budget in dollars considering the inflation.
 	\item \textbf{Keywords}	The keywords of each movies, they are not directly used by the tool, but they can be useful to understand if the MDS works well.
 	\item \textbf{MDS position} The coordinates of each movie in the MDS plot.
 	\item \textbf{Director} The movie's director.
@@ -158,7 +161,14 @@ We expect to see a first decline between 1920s and 30s and an increase of popula
 In the instance presented in figure \ref{fig:insightswestern} we have on the column plot as X axis the release year, in the Y axis the amount in percentage and we have filtered only the western movies. Unfortunally we can see the first decline between 1920s and 30s because these movies are not in the dataset, but, we can see the increase of popularity between 1945 until the 1975s, we can see also that starting from the 1980s the percentage of western movies is very small compared to the other genres, so we can see clearly the decline.\newline
 Using the parallel coordinates graph we have selected only the western movies, and setting the bubble plot with X for release year, revenue considering the inflation for Y and group the movies by the release year, we can make two observations in the bubble plot: the amount of movies are smaller as the years increase (the dots get always smaller and smaller as you go to the right), this confirm the trend of the column plot, and we can see how the western movies released between 60s and 70s have an higher revenue than the ones in 2000s, probably at that time the people were more interested to watch them.
 \subsubsection{A larger budget makes a better movie?}
-Spend a lot of money to produce a movie, ensure us to produce a better movie?
+Spend a lot of money to produce a movie, ensure us to produce a better movie? This could be a popular question at which in the paper \quotes{Correlations Between User Voting Data, Budget, and Box Office for Films in the Internet Movie Database} the autors have tried to get a response, and they conclude that \quotes{\emph{[...] we find a strong correlation between number of user votes and the economic statistics, particularly budget [...]}}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{images/insigth_budget}
+	\caption{The usege of bubble plot to see the correlation between the budget and the number of rates}
+	\label{fig:insigthbudget}
+\end{figure}
+Using the bubble plot we have set budget in the X axis, number of rates in Y axis, and the movies are grouped by budget, we can see that the number of rates increase as the budget increase, so we get the same result of the referenced paper.
 \subsubsection{Movie suggestions}
 \begin{figure}[H]
 	\centering
@@ -172,7 +182,9 @@ Spend a lot of money to produce a movie, ensure us to produce a better movie?
 	\caption{The user has selected the area find in figure \ref{fig:insightssuggestion} to have the list of movie on the right-bottom area}
 	\label{fig:insightssuggestion2}
 \end{figure}
-
+With the MDS plot the user can find new movies based on the ones that he know, for example a user using the parallel coordinates can filter only the action movies, only the most recent ones, starting from 2000 and only the ones with a sufficient average score (to avoid to get bad movies as suggestions), now in the MDS plot only the movies that meet these criteria are highlighted by red (as shown in figure \ref{fig:insightssuggestion}), the user can move the mouse hover the highlighted elements to visualize the names until he get one movie that the user likes, for example \quotes{\emph{X-Men Origins: Wolverine}}.\newline
+Once the user has find a movie that he like, he can switch in the MDS plot to the selection mode to select the area near the found movie and he get the list of similar movies in the list located at bottom-right.\newline
+As we can see in figure \ref{fig:insightssuggestion2} the suggested movies are all with superheros so the multidimensional scaling on the similarity of the keywords works well.
 
 
 \section{Conclusion}
