@@ -6,17 +6,17 @@ import os
 from datetime import datetime
 from math import isnan
 from sklearn.manifold import MDS
+from time import sleep
 
 import numpy as np
 import pandas as pd
-import cpi
 
 from utils import jaccard_similarity
 from dataset_manager import DatasetManager
+from inflation import Inflation
 
 ### Download  ###
 if __name__ == "__main__":
-    cpi.update()
     dm = DatasetManager()
     if dm.isDownloadNeeded():
         dm.downloadDataset()
@@ -42,6 +42,8 @@ a = list(map(lambda x: datetime.strptime(x, "%Y-%m-%d").year, a))
 max_release_year = max(a)
 print("MAX YEAR:", max_release_year)
 
+inflation_tool = Inflation()
+
 
 def get_director_by_id(id):
     json_crew = credit_csv.loc[id].crew
@@ -60,32 +62,33 @@ def checkValidity(overview_a):
     return isinstance(overview_a, str) or not isnan(overview_a)
 
 
-def process_chuck(thread_id, start_row, end_row, result, progress):
+def process_chuck(thread_id, start_row, end_row, result, progress, errorAmount):
+    global vote_average, vote_count, revenue, popularity, budget, runtime, spoken_languages, genres, overview, keywords, movie_id, title, release_year, revenue_inflated, budget_inflated, director
     for current_row in range(start_row, end_row):
         try:
             movie_id = int(movies_metadata.at[current_row, "id"])
-            imdb_id = movies_metadata.at[current_row, "imdb_id"]
+            # imdb_id = movies_metadata.at[current_row, "imdb_id"]
             title = movies_metadata.at[current_row, "title"]
             genres = ast.literal_eval(movies_metadata.at[current_row, "genres"])
             # Format 1989-02-17
             release_data = movies_metadata.at[current_row, "release_date"]
             release_year = datetime.strptime(str(release_data), "%Y-%m-%d").year
             runtime = float(movies_metadata.at[current_row, "runtime"])
-            spoken_languages = ast.literal_eval(
-                movies_metadata.at[current_row, "spoken_languages"]
-            )
+            spoken_languages = ast.literal_eval(movies_metadata.at[current_row, "spoken_languages"])
             vote_average = float(movies_metadata.at[current_row, "vote_average"])
             vote_count = int(movies_metadata.at[current_row, "vote_count"])
             revenue = int(movies_metadata.at[current_row, "revenue"])
-            revenue_inflated = int(cpi.inflate(revenue, release_year, max_release_year))
+            revenue_inflated = int(inflation_tool.compute(release_year, max_release_year, revenue))
             popularity = float(movies_metadata.at[current_row, "popularity"])
             budget = int(movies_metadata.at[current_row, "budget"])
-            budget_inflated = int(cpi.inflate(budget, release_year, max_release_year))
+            budget_inflated = int(inflation_tool.compute(release_year, max_release_year, budget))
             overview = movies_metadata.at[current_row, "overview"]
             keywords = ast.literal_eval(get_keywords_by_id(movie_id))
             director = get_director_by_id(movie_id)
-        except ValueError or KeyError:
-            pass  # print("Wrong format")
+        except ValueError or KeyError as e:
+            #print(e)
+            with errorAmount.get_lock():
+                errorAmount.value += 1
         else:
             if (
                     vote_average > 0
@@ -169,6 +172,7 @@ if __name__ == "__main__":
     if os.path.exists(filename):
         print("Skipping part 1")
     else:
+        errorAmount = multiprocessing.Value('i', 0)
         cpu_cores = multiprocessing.cpu_count()
         chuck_size = len(movies_metadata) // cpu_cores
         processes = []
@@ -182,6 +186,7 @@ if __name__ == "__main__":
                     chuck_size * (i + 1),
                     shared_list,
                     progress_list,
+                    errorAmount
                 ),
             )
             processes.append(p)
@@ -196,6 +201,7 @@ if __name__ == "__main__":
                     len(movies_metadata),
                     shared_list,
                     progress_list,
+                    errorAmount
                 ),
             )
             processes.append(p)
@@ -206,6 +212,9 @@ if __name__ == "__main__":
 
         for p in processes:
             p.join()
+
+        print("Number of error:", errorAmount.value)
+        sleep(3)
 
         movies = list(shared_list)
 

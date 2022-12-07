@@ -3,6 +3,7 @@ import json
 import numpy as np
 from utils import jaccard_similarity
 from random import sample
+from inflation import Inflation
 
 
 class MyUnitTest(unittest.TestCase):
@@ -29,7 +30,12 @@ class MyUnitTest(unittest.TestCase):
                     AssertionError("Error")
         self.assertEqual(
             equalElements, len(random_numbers_row) * len(random_numbers_col)
-        )        
+        )
+
+    def testInflation(self):
+        inflation = Inflation()
+        self.assertAlmostEqual(int(inflation.compute(1912, 2022, 5)), int(153.61), places=1)
+        self.assertAlmostEqual(int(inflation.compute(1923, 2017, 5)), int(71.6), places=1)
 
 
 if __name__ == "__main__":
