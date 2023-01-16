@@ -377,7 +377,6 @@ export class ColumnPlot extends Graph {
 
         this.yAxis.append("text")
             .text(isProportional ? "Percentage" : "Amount")
-            .text("Amount")
             .style("fill", "black")
             .attr("transform", "rotate(90)")
             .attr("y", 40)
