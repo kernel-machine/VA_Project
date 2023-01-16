@@ -381,7 +381,7 @@ export class ColumnPlot extends Graph {
             .attr("transform", "rotate(90)")
             .attr("y", 40)
             .attr("x", this.height / 2)
-
+            .attr("text-anchor", "middle")
 
         this.svg.selectAll(".bars").remove()
         const minDistance = this.groupedMovies.result.map(x => x.selElement).reduce((accumulator, currentValue, currentIndex, array) => {
