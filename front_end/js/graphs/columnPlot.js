@@ -289,9 +289,14 @@ export class ColumnPlot extends Graph {
 
         let genreGrouped = [...new Set(movies.map(x => x[xSelectedField]).sort())]
         this.groupedMovies = this.groupMoviesBySelectedField(genreGrouped, xSelectedField)
-        const maxValue = d3.max(this.groupedMovies.result.map(x => x.sum))
+        let maxValue
+        if (this.selectedGenre === undefined)
+            maxValue = d3.max(this.groupedMovies.result.map(x => x.sum))
+        else
+            maxValue = d3.max(this.groupedMovies.result.map(x => x[this.selectedGenre]))
+
         let bounds = this.getXBoundsByGropedMovies(this.groupedMovies.result, xSelectedField)
-        //console.log(bounds, this.groupedMovies)
+
         if (xSelectedField == "release_year") {
             bounds[1] += 0.5
             bounds[0] -= 0.5
@@ -349,6 +354,12 @@ export class ColumnPlot extends Graph {
             )
         }
 
+        let a;
+        if (this.selectedGenre == undefined)
+            a = d3.stack().keys(this.genres.map(x => x.name))(this.groupedMovies.result)
+        else
+            a = d3.stack().keys([this.selectedGenre])(this.groupedMovies.result)
+
         this.yAxisLinear = d3.scaleLinear()
             .domain([0, isProportional ? 100 : maxValue])
             .range([this.height, 0])
@@ -356,8 +367,8 @@ export class ColumnPlot extends Graph {
         this.yAxis = this.svg.append("g")
             .attr("class", "columnAxis")
             .call(d3.axisLeft(this.yAxisLinear).tickFormat(d => {
-                    if (d > 1000) return Math.floor(d / 1000) + "k"
-                    if (isProportional) d = d + "%"
+                if (d > 1000) return Math.floor(d / 1000) + "k"
+                if (isProportional) d = d + "%"
                     return d
                 }
             ))
@@ -372,11 +383,6 @@ export class ColumnPlot extends Graph {
             .attr("y", 40)
             .attr("x", this.height / 2)
 
-        let a;
-        if (this.selectedGenre == undefined)
-            a = d3.stack().keys(this.genres.map(x => x.name))(this.groupedMovies.result)
-        else
-            a = d3.stack().keys([this.selectedGenre])(this.groupedMovies.result)
 
         this.svg.selectAll(".bars").remove()
         const minDistance = this.groupedMovies.result.map(x => x.selElement).reduce((accumulator, currentValue, currentIndex, array) => {
