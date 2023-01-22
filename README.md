@@ -16,7 +16,7 @@ There are 5 parts:
 - **Column bar** to visualize genres division over different data
 - **List of select movies** a list of selected movies by user interaction
 
-You can test the website [here](https://kernel-machine.github.io/VA_Project/)
+You can test the software opening this website [here](https://kernel-machine.github.io/VA_Project/)
 
 ### Documentation
 - Project report [Report.pdf](https://github.com/kernel-machine/VA_Project/blob/main/report/report.pdf)
